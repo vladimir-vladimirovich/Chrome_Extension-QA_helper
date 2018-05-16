@@ -4,23 +4,23 @@
 	"version": "1",
 	"description": "Add something to context menu practice",
     "icons": {
-      "16": "skull-2.png"
+      "16": "images/skull-2.png"
     },
     "background": {
       "scripts": [
-        "main.js",
-        "scripts/require.js"
-      ]
+        "lib/require.js",
+        "backgroundScripts/main.js"
+      ],
+      "persistent": false
     },
-    "content_scripts": [  
+    "content_scripts": [
       {
         "matches": [
           "http://*/*",
           "https://*/*"
         ],
         "js": [
-          "contentScript.js",
-          "scripts/require.js"
+          "contentScripts/contentScript.js"
         ]
       }
     ],
