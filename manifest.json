@@ -10,8 +10,7 @@
       "scripts": [
         "lib/require.js",
         "backgroundScripts/main.js"
-      ],
-      "persistent": false
+      ]
     },
     "content_scripts": [
       {

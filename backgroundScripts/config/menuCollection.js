@@ -8,30 +8,28 @@ define({
         "contexts": ["all"]
     },
     comments: {
-        comments: {
-            "id": "comments",
-            "title": "comments>",
-            "contexts": ["all"],
-            "parentId": "CPH"
-        },
-        positive: {
-            "id": "commentPositive",
-            "title": "positive",
-            "contexts": ["all"],
-            "parentId": "comments"
-        },
-        negative: {
-            "id": "commentNegative",
-            "title": "negative",
-            "contexts": ["all"],
-            "parentId": "comments"
-        },
-        moderate: {
-            "id": "commentModerate",
-            "title": "moderate",
-            "contexts": ["all"],
-            "parentId": "comments"
-        }
+        "id": "comments",
+        "title": "comments>",
+        "contexts": ["all"],
+        "parentId": "CPH"
+    },
+    passed: {
+        "id": "commentPassed",
+        "title": "passed",
+        "contexts": ["all"],
+        "parentId": "comments"
+    },
+    failed: {
+        "id": "commentFailed",
+        "title": "failed",
+        "contexts": ["all"],
+        "parentId": "comments"
+    },
+    midState: {
+        "id": "commentMidState",
+        "title": "midState",
+        "contexts": ["all"],
+        "parentId": "comments"
     },
     description: {
         "id": "description",

@@ -16,16 +16,13 @@ require([
          * - add onClicked event listeners to created context menus
          */
         var setup = function () {
+            // Add all menu items to context menu
+            contextMenus.addMultipleItems(menuCollection);
+
             //  Initialize onClicked event handler for all context menus
             contextMenusEvents.multipleOnClickedSetup();
-
-            //  Initialize CPH context menu
-            contextMenus.addMenuItem(menuCollection.CPH);
-            //  Initialize comments context menu
-            contextMenus.addMultipleItems(menuCollection.comments);
-            //  Initialize description context menu
-            contextMenus.addMenuItem(menuCollection.description);
         };
 
         setup();
+
 });
