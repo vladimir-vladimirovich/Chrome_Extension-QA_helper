@@ -39,6 +39,7 @@ define([
             if(menuItem.menuItemId === menuId) {
                 chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
                     chrome.storage.local.get(['versionJSON'], function (version) {
+                        console.log(version.versionJSON);
                         var result = inner.combineStrings(menuId, text, version.versionJSON);
                         chrome.tabs.sendMessage(tabs[0].id, {onClick: result})
                     });
