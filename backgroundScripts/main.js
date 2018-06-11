@@ -5,10 +5,9 @@ require.config({
 require([
         'contextMenus',
         'config/menuCollection',
-        'config/commentsCollection',
-        'chromeCoreTools/contextMenusEvents'
+        'core/contextMenusEvents'
     ],
-    function (contextMenus, menuCollection, commentsCollection, contextMenusEvents) {
+    function (contextMenus, menuCollection, contextMenusEvents) {
 
         /**
          * Call all required method to:
