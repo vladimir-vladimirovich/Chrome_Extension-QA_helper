@@ -1,4 +1,4 @@
-define([],function () {
+define(['config/projectProperties'],function (projectProperties) {
 
     var requests = {};
 
@@ -11,7 +11,7 @@ define([],function () {
         var xhr = new XMLHttpRequest();
 
         // Set connection options
-        xhr.open('GET', 'https://wpl-licensee76-admin.ptdev.eu/buzz-theme/version.json', true);
+        xhr.open('GET', projectProperties.environment.defaultURL, true);
 
         // Actions to be performed on load
         xhr.onload = function () {
@@ -30,7 +30,7 @@ define([],function () {
 
             // Save stringified version.json into extension storage
             chrome.storage.local.set({'versionJSON': resultString}, function () {
-                console.log("[-_-] Local storage updated");
+                console.log("[-_-] Local storage updated with stringified version.json");
             })
         };
 
