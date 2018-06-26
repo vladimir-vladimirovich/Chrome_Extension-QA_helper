@@ -7,10 +7,7 @@
       "16": "images/skull-2.png"
     },
     "background": {
-      "scripts": [
-        "lib/require.js",
-        "backgroundScripts/main.js"
-      ]
+      "page": "backgroundScripts/background.html"
     },
     "content_scripts": [
       {

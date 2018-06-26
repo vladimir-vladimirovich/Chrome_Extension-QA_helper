@@ -1,4 +1,4 @@
-define({
+export let menuCollection = {
     /**
      * This file contains configuration for context menus
      */
@@ -37,4 +37,4 @@ define({
         "contexts": ["all"],
         "parentId": "CPH"
     }
-});
+};

@@ -1,11 +1,9 @@
-define([], function () {
-
-    return {
+export let commentsCollection = {
         /**
          * This file contains configuration for text
          * that will be pasted after click on context menu item
          */
-        passed: {
+        passed:  {
             id: "commentPassed",
             text: '{panel:title=PT QA Test Results|borderColor=#828282|titleBGColor=#7EC45C|bgColor=#E1FADE}\n' +
             '| *Test status:* | Passed (/) |\n' +
@@ -44,5 +42,4 @@ define([], function () {
             '\n' +
             '*Environment details:*\n'
         }
-    }
-});
+    };

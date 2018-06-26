@@ -1,33 +1,24 @@
-require.config({
-    baseUrl: chrome.runtime.getURL("backgroundScripts/")
-});
+import {contextMenus} from "./contextMenus.js";
+import {contextMenusEvents} from "./core/contextMenusEvents.js";
+import {menuCollection} from "./templates/menuCollection.js";
+import {requests} from "./core/requestHandler.js";
 
-require([
-        'contextMenus',
-        'config/menuCollection',
-        'core/contextMenusEvents',
-        'core/requestHandler'
-    ],
-    function (contextMenus, menuCollection, contextMenusEvents, requestHandler) {
+/**
+ * Call all required method to:
+ * - create context menus
+ * - add onClicked event listeners to created context menus
+ */
+let setup = function () {
+    // Initialize version.json request
+    requests.getVersionJSON(function () {
+        console.log('[-_-] Initialize version.json request');
+    });
 
-        /**
-         * Call all required method to:
-         * - create context menus
-         * - add onClicked event listeners to created context menus
-         */
-        var setup = function () {
-            // Initialize version.json request
-            requestHandler.getVersionJSON(function () {
-                console.log('[-_-] Initialize version.json request');
-            });
+    // Add all menu items to context menu
+    contextMenus.addMultipleItems(menuCollection);
 
-            // Add all menu items to context menu
-            contextMenus.addMultipleItems(menuCollection);
+    //  Initialize onClicked event handler for all context menus
+    contextMenusEvents.multipleOnClickedSetup();
+};
 
-            //  Initialize onClicked event handler for all context menus
-            contextMenusEvents.multipleOnClickedSetup();
-        };
-
-        setup();
-
-});
+setup();
