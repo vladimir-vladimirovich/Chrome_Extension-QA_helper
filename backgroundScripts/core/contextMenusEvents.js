@@ -1,11 +1,6 @@
 import {environment} from "../config/projectProperties.js";
 import {commentsCollection} from "../templates/commentsCollection.js";
-
-// var inner = {
-let commentVersionStart = ' |\n' +
-    '| *Version stamp:* | ';
-let commentVersionEnd = ' |\n' +
-    '{panel}';
+import {customComments} from "../templates/cutomsComments.js";
 
 /**
  * Comment constructor
@@ -16,12 +11,11 @@ let commentVersionEnd = ' |\n' +
  */
 let combineStrings = function (menuId, text, version) {
     if (menuId.includes('comment')) {
-        return text + environment.defaultEnvironmentURL + commentVersionStart + version + commentVersionEnd;
+        return text + customComments.commentVersionStart + version + customComments.commentVersionEnd;
     } else {
         return text + environment.defaultEnvironmentURL + '\n' + version;
     }
 };
-// };
 
 let contextMenusEvents = {};
 
@@ -45,34 +39,17 @@ contextMenusEvents.onClicked = function (menuId, text) {
 
             chrome.storage.local.get(['versionJSON'], cb);
         });
-
-
-        // if (menuItem.menuItemId === menuId) {
-        //     chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
-        //         chrome.storage.local.get(['versionJSON'], function (version) {
-        //             var result = combineStrings(menuId, text, version.versionJSON);
-        //             chrome.tabs.sendMessage(tabs[0].id, {onClick: result})
-        //         });
-        //     })
-        // }
     });
 };
 
 /**
  * Initialize all context menu items
  */
-contextMenusEvents.multipleOnClickedSetup = function () {
-    let array = Object.values(commentsCollection);
-    array.forEach(function (t) {
-        this.onClicked(t.id, t.text)
-    }.bind(this));
+contextMenusEvents.multipleOnClickedSetup = () => {
+    Object.values(commentsCollection).map((t) => {
+        contextMenusEvents.onClicked(t.id, t.text)
+    });
 };
-
-// contextMenusEvents.multipleOnClickedSetup = () => {
-//     Object.values(commentsCollection).map((t) => {
-//         this.onClicked(t.id, t.text)
-//     });
-// };
 
 export {contextMenusEvents}
 

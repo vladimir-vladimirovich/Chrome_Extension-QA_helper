@@ -1,4 +1,4 @@
 export let environment = {
-    defaultEnvironmentURL: "https://wpl-licensee76-admin.ptdev.eu/",
-    defaultFEJSONUrl: "buzz-theme/version.json"
+    defaultEnvironmentURL: "https://portal-admin-test.onetogo.co",
+    defaultFEJSONUrl: "/buzz-theme/version.json"
 };

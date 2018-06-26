@@ -8,7 +8,7 @@ import {requests} from "./core/requestHandler.js";
  * - create context menus
  * - add onClicked event listeners to created context menus
  */
-let setup = function () {
+let setup = () => {
     // Initialize version.json request
     requests.getVersionJSON(function () {
         console.log('[-_-] Initialize version.json request');
