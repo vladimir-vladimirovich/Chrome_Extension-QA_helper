@@ -1,6 +1,7 @@
 import {environment} from "../config/projectProperties.js";
 import {commentsCollection} from "../templates/commentsCollection.js";
 import {customComments} from "../templates/cutomsComments.js";
+import {requestHandler} from "./requestHandler.js";
 
 /**
  * Comment constructor
@@ -32,12 +33,11 @@ contextMenusEvents.onClicked = function (menuId, text) {
             return;
         }
         chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
-            let cb = function (version) {
-                let result = combineStrings(menuId, text, version.versionJSON);
+            let callback = function() {
+                let result = combineStrings(menuId, text, this);
                 chrome.tabs.sendMessage(tabs[0].id, {onClick: result})
             };
-
-            chrome.storage.local.get(['versionJSON'], cb);
+            requestHandler.getVersionJSON(callback);
         });
     });
 };
