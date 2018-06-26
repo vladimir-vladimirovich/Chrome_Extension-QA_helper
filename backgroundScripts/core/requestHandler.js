@@ -14,7 +14,7 @@ requests.getVersionJSON = function (callback) {
     xhr.open('GET', environment.defaultEnvironmentURL + environment.defaultFEJSONUrl, true);
 
     // Actions to be performed on load
-    xhr.onload = function () {
+    xhr.onload = () => {
         let versionJSON = JSON.parse(xhr.responseText);
 
         // Delete unnecessary property: commit log
@@ -35,9 +35,14 @@ requests.getVersionJSON = function (callback) {
     };
 
     // ERROR handler
-    xhr.onerror = function() {
+    // xhr.onerror = function() {
+    //     console.log( '[-_-] XMLHttpRequest ERROR: ' + this.status );
+    // };
+
+    xhr.onerror = () => {
         console.log( '[-_-] XMLHttpRequest ERROR: ' + this.status );
     };
+
 
     // Send request
     xhr.send()
