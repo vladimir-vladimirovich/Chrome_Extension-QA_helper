@@ -27,11 +27,6 @@ requestHandler.getVersionJSON = function (callback) {
         }
 
         callback.call(resultString);
-
-        // Save stringified version.json into extension storage
-        chrome.storage.local.set({'versionJSON': resultString}, function () {
-            console.log("[-_-] Local storage updated with stringified version.json");
-        })
     };
 
     // ERROR handler
