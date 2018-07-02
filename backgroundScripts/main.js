@@ -1,7 +1,7 @@
 import {contextMenus} from "./contextMenus.js";
 import {contextMenusEvents} from "./core/contextMenusEvents.js";
 import {menuCollection} from "./templates/menuCollection.js";
-import {requestHandler} from "./core/requestHandler.js";
+import {checkDefaultURL} from "./core/system.js";
 
 /**
  * Call all required method to:
@@ -9,10 +9,7 @@ import {requestHandler} from "./core/requestHandler.js";
  * - add onClicked event listeners to created context menus
  */
 let setup = () => {
-    // Initialize version.json request
-    requestHandler.getVersionJSON(function () {
-        console.log('[-_-] Initialize version.json request');
-    });
+    checkDefaultURL();
 
     // Add all menu items to context menu
     contextMenus.addMultipleItems(menuCollection);

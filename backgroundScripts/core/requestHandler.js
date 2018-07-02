@@ -1,5 +1,7 @@
 import {environment} from "../config/projectProperties.js";
 
+console.log("hello from requestHandler");
+
 let requestHandler = {};
 
 /**
@@ -11,7 +13,7 @@ requestHandler.getVersionJSON = function (callback) {
     let xhr = new XMLHttpRequest();
 
     // Set connection options
-    xhr.open('GET', environment.defaultEnvironmentURL + environment.defaultFEJSONUrl, true);
+    xhr.open('GET', environment.defaultEnvironmentURL + environment.defaultFEJSONPass, true);
 
     // Actions to be performed on load
     xhr.onload = () => {

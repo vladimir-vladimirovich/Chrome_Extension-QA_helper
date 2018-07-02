@@ -10,6 +10,7 @@ import {requestHandler} from "./requestHandler.js";
  * @param version
  * @return {*}
  */
+// To be moved outside this file
 let combineStrings = function (menuId, text, version) {
     if (menuId.includes('comment')) {
         return text + customComments.commentVersionStart + version + customComments.commentVersionEnd;
