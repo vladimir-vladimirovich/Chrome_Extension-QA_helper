@@ -13,9 +13,9 @@ import {requestHandler} from "./requestHandler.js";
 // To be moved outside this file
 let combineStrings = function (menuId, text, version) {
     if (menuId.includes('comment')) {
-        return text + customComments.commentVersionStart + version + customComments.commentVersionEnd;
+        return text + environment.defaultEnvironmentURL + ' | \n' + customComments.commentVersionStart + version + customComments.commentVersionEnd;
     } else {
-        return text + environment.defaultEnvironmentURL + '\n' + version;
+        return '*STR:*\n' + `# Open ${environment.defaultEnvironmentURL} \n` + text + environment.defaultEnvironmentURL + '\n' + version;
     }
 };
 

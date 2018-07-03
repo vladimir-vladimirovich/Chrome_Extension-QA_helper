@@ -14,8 +14,10 @@ chrome.runtime.onMessage.addListener((request) => {
  */
 export let checkDefaultURL = () => {
   chrome.storage.local.get(['defaultURL'], function (result) {
+      console.log("checking storage...");
       if(result.defaultURL) {
-          environment.defaultEnvironmentURL = result;
+          console.log("result.defaultURL: " + result.defaultURL);
+          environment.defaultEnvironmentURL = result.defaultURL;
       }
   })
 };

@@ -1,7 +1,5 @@
 import {environment} from "../config/projectProperties.js";
 
-console.log("hello from requestHandler");
-
 let requestHandler = {};
 
 /**

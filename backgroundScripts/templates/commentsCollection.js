@@ -1,5 +1,3 @@
-import {environment} from "../config/projectProperties.js";
-
 export let commentsCollection = {
         /**
          * This file contains configuration for text
@@ -11,7 +9,7 @@ export let commentsCollection = {
             '| *Test status:* | Passed (/) |\n' +
             '| *Test scope\\Notes:* |  |\n' +
             '| *Device\\OS\\Browser:* |  |\n' +
-            `| *Env URL:* | ${environment.defaultEnvironmentURL} |\n`
+            '| *Env URL:* | '
         },
         failed: {
             id: "commentFailed",
@@ -19,7 +17,7 @@ export let commentsCollection = {
             '| *Test status:* | Failed (x) |\n' +
             '| *Test scope\\Notes:* |  |\n' +
             '| *Device\\OS\\Browser:* |  |\n' +
-            `| *Env URL:* | ${environment.defaultEnvironmentURL} |\n`
+            '| *Env URL:* | '
         },
         midState: {
             id: "commentMidState",
@@ -27,13 +25,11 @@ export let commentsCollection = {
             '| *Test status:* | Test is partly OK |\n' +
             '| *Test scope\\Notes:* |  |\n' +
             '| *Device\\OS\\Browser:* |  |\n' +
-            `| *Env URL:* | ${environment.defaultEnvironmentURL} |\n`
+            `| *Env URL:* | `
         },
         description: {
             id: "description",
-            text: '*STR:*\n' +
-            `# Open ${environment.defaultEnvironmentURL} \n` +
-            '\n' +
+            text: '\n' +
             '*AR:* \n' +
             '# \n' +
             '# For more details view attachment [^]\n' +
