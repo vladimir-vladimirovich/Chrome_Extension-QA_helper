@@ -1,5 +1,8 @@
 let form = document.getElementById("environment");
 
+/**
+ * Save URL and path to version.json in chrome extension storage
+ */
 form.addEventListener('submit', function (element) {
     element.preventDefault();
 
