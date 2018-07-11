@@ -9,7 +9,7 @@ let defaultVersionPath = 'defaultVersionPath';
 let urlStorage = 'urlStorage';
 let versionStorage = 'versionStorage';
 
-// <----- Dropdown area
+// <----- Select URL and version path area
 
 /**
  * Clean the dropdown and fill it with fresh data
@@ -57,8 +57,6 @@ fillEnvironmentAndVersionList();
  */
 let setupChangeEvent = function (element, storage, message) {
     element.addEventListener('change', function (element) {
-        console.log("=====Element: ");
-        console.log(element.target.value);
         chrome.storage.local.set({[storage]: element.target.value});
         chrome.runtime.sendMessage({[message]: element.target.value});
     });
