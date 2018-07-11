@@ -4,15 +4,29 @@
     </head>
 
     <body>
-    <form id="environment">
-        <label for="url">Environment URL:</label>
-        <input id="url" name="Environment URL">
+        <form id="envSelectorForm">
+            <h3>Current environment</h3>
+            <select id="environmentSelector">Selector</select>
+            <h3>Current version path</h3>
+            <select id="versionPathSelector">Selector</select>
+        </form>
 
-        <label for="versionPath">Version.json path(in format /...)</label>
-        <input id="versionPath" name="Version path">
+        <form id="addEnv">
+            <h3>Add URL or version path to list</h3>
+            <label for="addUrl">Add URL:</label>
+            <input id="addUrl" name="Environment URL">
 
-        <input type="submit">
-    </form>
-    <script type="text/javascript" src="popup.js"></script>
+            <label for="addVersionPath">Add version.json path(in format /...)</label>
+            <input id="addVersionPath" name="Version path">
+
+            <input type="submit" value="Add">
+        </form>
+
+        <form id="cleanStorage">
+            <h3>Clean URL and version path storage's</h3>
+            <input type="submit" value="Clean storage">
+        </form>
+
+        <script type="text/javascript" src="popup.js"></script>
     </body>
 </html>
