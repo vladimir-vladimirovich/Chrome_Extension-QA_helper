@@ -1,3 +1,5 @@
+import { menuCollection } from "./templates/menuCollection.js";
+
 let contextMenus = {};
 
 /**
@@ -13,8 +15,8 @@ contextMenus.addMenuItem = (menuItem) => {
  * 2. Walking through array and adding items to context menu
  * @param {Object} menusObject
  */
-contextMenus.addMultipleItems = function (menusObject) {
-    let array = Object.values(menusObject);
+contextMenus.addMultipleItems = function () {
+    let array = Object.values(menuCollection);
     // array.forEach(function (t) {
     //     this.addMenuItem(t)
     // }.bind(this))

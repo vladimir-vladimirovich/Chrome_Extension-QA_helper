@@ -1,6 +1,5 @@
 let addEnv = document.getElementById("addEnv");
 let cleanStorageButton = document.getElementById("cleanStorage");
-
 let environmentSelector = document.getElementById("environmentSelector");
 let versionPathSelector = document.getElementById("versionPathSelector");
 
@@ -46,9 +45,6 @@ let fillEnvironmentAndVersionList = function () {
     initializeEnvironmentList(versionPathSelector, versionStorage, defaultVersionPath);
 };
 
-// Setup dropdowns
-fillEnvironmentAndVersionList();
-
 /**
  * Adding event listeners selectors
  * @param element
@@ -62,32 +58,30 @@ let setupChangeEvent = function (element, storage, message) {
     });
 };
 
-/**
- * Setup events listeners for all selectors
- */
-let setupChangeEvents = function () {
-    setupChangeEvent(environmentSelector, defaultUrl, "URLChange");
-    setupChangeEvent(versionPathSelector, defaultVersionPath, "versionPathChange");
+let setupSubmitEvent = () => {
+    /**
+     * Add new url or version path block
+     */
+    addEnv.addEventListener('submit', function (element) {
+        element.preventDefault();
+
+        let addedUrl = element.target.elements['addUrl'].value;
+        let addedVersionPath = element.target.elements['addVersionPath'].value;
+
+        updateStorageWithUrl(urlStorage, addedUrl);
+        updateStorageWithUrl(versionStorage, addedVersionPath, true);
+    });
+
+    /**
+     * Clean storage block
+     */
+    cleanStorageButton.addEventListener('submit', function (element) {
+        element.preventDefault();
+        cleanStorage();
+        console.log("[-_-] URL AND VERSION STORAGE'S ARE CLEARED!");
+        fillEnvironmentAndVersionList();
+    });
 };
-
-// Setup selectors
-setupChangeEvents();
-
-// <----- ----->
-// <----- Add URL and version path area
-
-/**
- * Add new url or version path block
- */
-addEnv.addEventListener('submit', function (element) {
-    element.preventDefault();
-
-    let addedUrl = element.target.elements['addUrl'].value;
-    let addedVersionPath = element.target.elements['addVersionPath'].value;
-
-    updateStorageWithUrl(urlStorage, addedUrl);
-    updateStorageWithUrl(versionStorage, addedVersionPath, true);
-});
 
 /**
  * Saves data in chrome storage
@@ -116,9 +110,6 @@ let updateStorageWithUrl = function (storageLink, url, refresh) {
 
 };
 
-// <----- ----->
-// <----- Clean storage area
-
 /**
  * Clean storage function
  */
@@ -128,12 +119,15 @@ let cleanStorage = () => {
 };
 
 /**
- * Clean storage block
+ * Setup events listeners for all selectors
  */
-cleanStorageButton.addEventListener('submit', function (element) {
-    element.preventDefault();
-    cleanStorage();
-    console.log("[-_-] URL AND VERSION STORAGE'S ARE CLEARED!");
-    fillEnvironmentAndVersionList();
-});
+let setupEvents = function () {
+    setupChangeEvent(environmentSelector, defaultUrl, "URLChange");
+    setupChangeEvent(versionPathSelector, defaultVersionPath, "versionPathChange");
+    setupSubmitEvent();
+};
 
+// Setup dropdowns
+fillEnvironmentAndVersionList();
+// Setup selectors
+setupEvents();
