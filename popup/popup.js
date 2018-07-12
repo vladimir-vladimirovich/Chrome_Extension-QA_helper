@@ -1,16 +1,41 @@
-let addEnv = document.getElementById("addEnv");
-let cleanStorageButton = document.getElementById("cleanStorage");
+let addEnvUrlForm = document.getElementById('addEnvUrlForm');
+let addVersionPathForm = document.getElementById('addVersionPathForm');
+let cleanStorageButton = document.getElementById('cleanStorage');
+let environmentSelector = document.getElementById('environmentSelector');
+let versionPathSelector = document.getElementById('versionPathSelector');
 
-let environmentSelector = document.getElementById("environmentSelector");
-let versionPathSelector = document.getElementById("versionPathSelector");
+let ENV = document.getElementsByName('ENV');
 
 let defaultUrl = 'defaultURL';
 let defaultVersionPath = 'defaultVersionPath';
 let urlStorage = 'urlStorage';
 let versionStorage = 'versionStorage';
+let currentEnvironmentGroup = 'currentEnvironmentGroup';
 
-// <----- Select URL and version path area
+// ========================================================================
+let setupRadioButtonClickEvents = () => {
+    for(let i = 0; i < ENV.length; i++) {
+        ENV[i].onclick = function() {
+            console.log("Clicked: " + ENV[i].value);
+            chrome.storage.local.set({[currentEnvironmentGroup]: ENV[i].value});
+        }
+    }
+};
 
+let initializeEnvironmentGroup = function () {
+    chrome.storage.local.get([currentEnvironmentGroup], function (result) {
+        for(let i = 0; i < ENV.length; i++) {
+            if(result.currentEnvironmentGroup === ENV[i].value) {
+               ENV[i].checked = true;
+            }
+        }
+    });
+};
+
+initializeEnvironmentGroup();
+setupRadioButtonClickEvents();
+
+// ========================================================================
 /**
  * Clean the dropdown and fill it with fresh data
  */
@@ -46,11 +71,8 @@ let fillEnvironmentAndVersionList = function () {
     initializeEnvironmentList(versionPathSelector, versionStorage, defaultVersionPath);
 };
 
-// Setup dropdowns
-fillEnvironmentAndVersionList();
-
 /**
- * Adding event listeners selectors
+ * Adding event listeners
  * @param element
  * @param storage
  * @param message
@@ -62,62 +84,56 @@ let setupChangeEvent = function (element, storage, message) {
     });
 };
 
-/**
- * Setup events listeners for all selectors
- */
-let setupChangeEvents = function () {
-    setupChangeEvent(environmentSelector, defaultUrl, "URLChange");
-    setupChangeEvent(versionPathSelector, defaultVersionPath, "versionPathChange");
+let setupSubmitEvent = () => {
+    /**
+     * Add new url or version path block
+     */
+    addEnvUrlForm.addEventListener('submit', function (element) {
+        element.preventDefault();
+
+        let addedUrl = element.target.elements['addUrl'].value;
+
+        updateStorageWithUrl(urlStorage, addedUrl);
+    });
+
+    addVersionPathForm.addEventListener('submit', function (element) {
+        element.preventDefault();
+
+        let addedVersionPath = element.target.elements['addVersionPath'].value;
+
+        updateStorageWithUrl(versionStorage, addedVersionPath);
+    });
+
+    /**
+     * Clean storage block
+     */
+    cleanStorageButton.addEventListener('submit', function (element) {
+        element.preventDefault();
+        cleanStorage();
+        console.log("[-_-] URL AND VERSION STORAGE'S ARE CLEARED!");
+        fillEnvironmentAndVersionList();
+    });
 };
-
-// Setup selectors
-setupChangeEvents();
-
-// <----- ----->
-// <----- Add URL and version path area
-
-/**
- * Add new url or version path block
- */
-addEnv.addEventListener('submit', function (element) {
-    element.preventDefault();
-
-    let addedUrl = element.target.elements['addUrl'].value;
-    let addedVersionPath = element.target.elements['addVersionPath'].value;
-
-    updateStorageWithUrl(urlStorage, addedUrl);
-    updateStorageWithUrl(versionStorage, addedVersionPath, true);
-});
 
 /**
  * Saves data in chrome storage
  * @param {String} storageLink - where to save
  * @param url - what to save
- * @param {boolean} refresh
  */
-let updateStorageWithUrl = function (storageLink, url, refresh) {
+let updateStorageWithUrl = function (storageLink, url) {
     chrome.storage.local.get([storageLink], function (result) {
         if(result[storageLink] && url !== "") {
-
             let newArrayIf = result[storageLink];
             newArrayIf.push(url);
-
             chrome.storage.local.set({[storageLink]: newArrayIf})
-
         } else if(!result[storageLink] && url !== "") {
             let newArrayElse = [url];
             chrome.storage.local.set({[storageLink]: newArrayElse})
         } else console.log("[-_-] Entry field is empty or unknown error while trying to chrome.storage.local.get");
 
-        if(refresh) {
-            fillEnvironmentAndVersionList();
-        }
+        fillEnvironmentAndVersionList();
     });
-
 };
-
-// <----- ----->
-// <----- Clean storage area
 
 /**
  * Clean storage function
@@ -128,12 +144,15 @@ let cleanStorage = () => {
 };
 
 /**
- * Clean storage block
+ * Setup events listeners for all selectors
  */
-cleanStorageButton.addEventListener('submit', function (element) {
-    element.preventDefault();
-    cleanStorage();
-    console.log("[-_-] URL AND VERSION STORAGE'S ARE CLEARED!");
-    fillEnvironmentAndVersionList();
-});
+let setupEvents = function () {
+    setupChangeEvent(environmentSelector, defaultUrl, 'URLChange');
+    setupChangeEvent(versionPathSelector, defaultVersionPath, 'versionPathChange');
+    setupSubmitEvent();
+};
 
+// Setup dropdowns
+fillEnvironmentAndVersionList();
+// Setup selectors
+setupEvents();

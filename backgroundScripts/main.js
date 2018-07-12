@@ -1,7 +1,6 @@
 import {contextMenus} from "./contextMenus.js";
-import {contextMenusEvents} from "./core/contextMenusEvents.js";
-import {menuCollection} from "./templates/menuCollection.js";
-import {checkDefaultURL} from "./core/system.js";
+import System from "./core/system.js";
+import ContextMenusEvents from "./core/contextMenusEvents.js";
 
 /**
  * Call all required method to:
@@ -9,13 +8,13 @@ import {checkDefaultURL} from "./core/system.js";
  * - add onClicked event listeners to created context menus
  */
 let setup = () => {
-    checkDefaultURL();
+    System.init();
 
     // Add all menu items to context menu
-    contextMenus.addMultipleItems(menuCollection);
+    contextMenus.addMultipleItems();
 
     //  Initialize onClicked event handler for all context menus
-    contextMenusEvents.multipleOnClickedSetup();
+    ContextMenusEvents.multipleOnClickedSetup();
 };
 
 setup();

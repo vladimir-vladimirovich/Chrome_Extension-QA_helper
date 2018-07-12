@@ -1,22 +1,6 @@
 import {environment} from "../config/projectProperties.js";
 
-/**
- * Listener for environment URL update
- */
-chrome.runtime.onMessage.addListener((request) => {
-    if(request.URLChange) {
-        environment.defaultEnvironmentURL = request.URLChange;
-    }
-
-    if(request.versionPathChange) {
-        environment.defaultFEJSONPass = request.versionPathChange;
-    }
-});
-
-/**
- * Check if there is default URL set in storage and if it is - use it
- */
-export let checkDefaultURL = () => {
+let checkDefaultURL = () => {
     chrome.storage.local.get(['defaultURL'], function (result) {
         console.log("checking storage...");
         if(result.defaultURL) {
@@ -33,3 +17,23 @@ export let checkDefaultURL = () => {
         }
     })
 };
+
+/**
+ * Check if there is default URL set in storage and if it is - use it
+ */
+export default {
+    init() {
+        //Listener for environment URL update
+        chrome.runtime.onMessage.addListener((request) => {
+            if(request.URLChange) {
+                environment.defaultEnvironmentURL = request.URLChange;
+            }
+
+            if(request.versionPathChange) {
+                environment.defaultFEJSONPass = request.versionPathChange;
+            }
+        });
+
+        checkDefaultURL();
+    }
+}

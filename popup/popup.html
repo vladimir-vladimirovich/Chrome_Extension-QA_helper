@@ -5,16 +5,42 @@
 
     <body>
         <form id="envSelectorForm">
+            <table align="center">
+                <tr>
+                    <th>
+                        <input type="radio" name="ENV" value="testUrlStorage">
+                    </th>
+                    <th>
+                        <input type="radio" name="ENV" value="stgUrlStorage">
+                    </th>
+                    <th>
+                        <input type="radio" name="ENV"  value="prodUrlStorage">
+                    </th>
+                </tr>
+                <tr>
+                    <td>TST</td>
+                    <td>STG</td>
+                    <td>PROD</td>
+                </tr>
+            </table>
+
             <h3>Current environment</h3>
             <select id="environmentSelector">Selector</select>
             <h3>Current version path</h3>
             <select id="versionPathSelector">Selector</select>
         </form>
 
-        <form id="addEnv">
-            <h3>Add URL or version path to list</h3>
+        <form id="addEnvUrlForm">
+            <h3>Add URL to list</h3>
+
             <label for="addUrl">Add URL:</label>
             <input id="addUrl" name="Environment URL">
+
+            <input type="submit" value="Add">
+        </form>
+
+        <form id="addVersionPathForm">
+            <h3>Add version path to list</h3>
 
             <label for="addVersionPath">Add version.json path(in format /...)</label>
             <input id="addVersionPath" name="Version path">
