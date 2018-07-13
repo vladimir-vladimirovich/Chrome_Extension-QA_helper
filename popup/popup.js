@@ -4,7 +4,7 @@ let cleanStorageButton = document.getElementById('cleanStorage');
 let environmentSelector = document.getElementById('environmentSelector');
 let versionPathSelector = document.getElementById('versionPathSelector');
 
-let ENV = document.getElementsByName('ENV');
+let ENV = document.getElementsByName('envSelector');
 
 let defaultUrl = 'defaultURL';
 let defaultVersionPath = 'defaultVersionPath';
