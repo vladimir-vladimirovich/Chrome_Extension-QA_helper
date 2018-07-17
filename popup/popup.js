@@ -1,10 +1,19 @@
 let addEnvUrlForm = document.getElementById('addEnvUrlForm');
 let addVersionPathForm = document.getElementById('addVersionPathForm');
-let cleanStorageButton = document.getElementById('cleanStorage');
 let environmentSelector = document.getElementById('environmentSelector');
 let versionPathSelector = document.getElementById('versionPathSelector');
 
-let ENV = document.getElementsByName('envSelector');
+let cleanTestUrlStorageButton = document.getElementById('cleanTestUrlStorage');
+let cleanStgUrlStorageButton = document.getElementById('cleanStgUrlStorage');
+let cleanProdUrlStorageButton = document.getElementById('cleanProdUrlStorage');
+let cleanVersionPaths = document.getElementById('cleanVersionPaths');
+
+let testUrlStorage = "testUrlStorage";
+let stgUrlStorage = "stgUrlStorage";
+let prodUrlStorage = "prodUrlStorage";
+
+let envSelector = document.getElementsByName('envSelector');
+let envInput = document.getElementsByName('envInput');
 
 let defaultUrl = 'defaultURL';
 let defaultVersionPath = 'defaultVersionPath';
@@ -12,38 +21,61 @@ let urlStorage = 'urlStorage';
 let versionStorage = 'versionStorage';
 let currentEnvironmentGroup = 'currentEnvironmentGroup';
 
-// ========================================================================
+/**
+ * Setup events for radio buttons
+ */
 let setupRadioButtonClickEvents = () => {
-    for(let i = 0; i < ENV.length; i++) {
-        ENV[i].onclick = function() {
-            console.log("Clicked: " + ENV[i].value);
-            chrome.storage.local.set({[currentEnvironmentGroup]: ENV[i].value});
+    for(let i = 0; i < envSelector.length; i++) {
+        envSelector[i].onclick = function() {
+            initializeEnvironmentList(environmentSelector, envSelector[i].value, defaultUrl);
         }
     }
 };
 
+/**
+ * Pull from storage active env group(TEST or STG or PROD) and fill the environment with actual data + version list
+ */
 let initializeEnvironmentGroup = function () {
     chrome.storage.local.get([currentEnvironmentGroup], function (result) {
-        for(let i = 0; i < ENV.length; i++) {
-            if(result.currentEnvironmentGroup === ENV[i].value) {
-               ENV[i].checked = true;
+        let storage;
+        for(let i = 0; i < envSelector.length; i++) {
+            if(result.currentEnvironmentGroup === envSelector[i].value) {
+                envSelector[i].checked = true;
+                storage = envSelector[i].value;
             }
         }
+
+        initializeEnvironmentList(environmentSelector, storage, defaultUrl);
+        initializeEnvironmentList(versionPathSelector, versionStorage, defaultVersionPath);
     });
 };
 
 initializeEnvironmentGroup();
 setupRadioButtonClickEvents();
 
-// ========================================================================
+/**
+ * returns active radio button from group
+ * @param element
+ * @return {string|Number|*}
+ */
+let getCheckedRadioButton = (element) => {
+    for (let i = 0; i < element.length; i++) {
+        if(element[i].checked) {
+            console.log("Active env: " + element[i].value);
+            return element[i].value;
+        } else console.log("There are no checked radio button in environment adding area");
+    }
+};
+
 /**
  * Clean the dropdown and fill it with fresh data
+ * @param {Element} selector - point to selector you want to fill with data
+ * @param {String} storage - points to storage from where the data is taken
+ * @param {String} defaultStorage - pointer to currently active URL which is selected automatically
  */
 let initializeEnvironmentList = function (selector, storage, defaultStorage) {
     chrome.storage.local.get([storage], function (result) {
         console.log("[-_-] Adding items to URL list...");
-
-        // noinspection JSAnnotator
         selector.options.length = 0;
         if(result[storage] === undefined) {
             let emptyOption = document.createElement('option');
@@ -64,14 +96,6 @@ let initializeEnvironmentList = function (selector, storage, defaultStorage) {
 };
 
 /**
- * Dropdowns setup
- */
-let fillEnvironmentAndVersionList = function () {
-    initializeEnvironmentList(environmentSelector, urlStorage, defaultUrl);
-    initializeEnvironmentList(versionPathSelector, versionStorage, defaultVersionPath);
-};
-
-/**
  * Adding event listeners
  * @param element
  * @param storage
@@ -79,8 +103,11 @@ let fillEnvironmentAndVersionList = function () {
  */
 let setupChangeEvent = function (element, storage, message) {
     element.addEventListener('change', function (element) {
+        let activeEnv = getCheckedRadioButton(envSelector);
         chrome.storage.local.set({[storage]: element.target.value});
         chrome.runtime.sendMessage({[message]: element.target.value});
+
+        chrome.storage.local.set({[currentEnvironmentGroup]: activeEnv});
     });
 };
 
@@ -92,8 +119,15 @@ let setupSubmitEvent = () => {
         element.preventDefault();
 
         let addedUrl = element.target.elements['addUrl'].value;
+        let inputEnv = getCheckedRadioButton(envInput);
+        let selectorEnv = getCheckedRadioButton(envSelector);
 
-        updateStorageWithUrl(urlStorage, addedUrl);
+        updateStorageWithUrl(inputEnv, addedUrl,() => {
+            if(inputEnv === selectorEnv) {
+                initializeEnvironmentList(environmentSelector, inputEnv, defaultUrl);
+            }
+        });
+
     });
 
     addVersionPathForm.addEventListener('submit', function (element) {
@@ -102,25 +136,48 @@ let setupSubmitEvent = () => {
         let addedVersionPath = element.target.elements['addVersionPath'].value;
 
         updateStorageWithUrl(versionStorage, addedVersionPath);
-    });
 
-    /**
-     * Clean storage block
-     */
-    cleanStorageButton.addEventListener('submit', function (element) {
+        updateStorageWithUrl(versionStorage, addedVersionPath,() => {
+            initializeEnvironmentList(versionPathSelector, versionStorage, defaultVersionPath);
+        });
+    });
+};
+
+/**
+ * Setup click events for clean storage buttons
+ */
+let setupButtonClickEvents = () => {
+    setupButtonClickEvent(cleanTestUrlStorageButton, testUrlStorage);
+    setupButtonClickEvent(cleanStgUrlStorageButton, stgUrlStorage);
+    setupButtonClickEvent(cleanProdUrlStorageButton, prodUrlStorage);
+    setupButtonClickEvent(cleanVersionPaths, versionStorage, function () {
+        initializeEnvironmentList(versionPathSelector, versionStorage, defaultVersionPath);
+    });
+};
+
+/**
+ * Setup events for clean storage button
+ * @param button
+ * @param storageUrl
+ * @param callback
+ */
+let setupButtonClickEvent = (button, storageUrl, callback) => {
+    button.addEventListener('click', function (element) {
         element.preventDefault();
-        cleanStorage();
-        console.log("[-_-] URL AND VERSION STORAGE'S ARE CLEARED!");
-        fillEnvironmentAndVersionList();
+        cleanStorage(storageUrl, function () {
+            callback();
+        });
+        console.log("Following storage is cleaned: " + storageUrl);
     });
 };
 
 /**
  * Saves data in chrome storage
  * @param {String} storageLink - where to save
- * @param url - what to save
+ * @param {String} url - what to save
+ * @param callback
  */
-let updateStorageWithUrl = function (storageLink, url) {
+let updateStorageWithUrl = function (storageLink, url, callback) {
     chrome.storage.local.get([storageLink], function (result) {
         if(result[storageLink] && url !== "") {
             let newArrayIf = result[storageLink];
@@ -131,16 +188,19 @@ let updateStorageWithUrl = function (storageLink, url) {
             chrome.storage.local.set({[storageLink]: newArrayElse})
         } else console.log("[-_-] Entry field is empty or unknown error while trying to chrome.storage.local.get");
 
-        fillEnvironmentAndVersionList();
+        if(callback) {
+            callback();
+        }
     });
 };
 
 /**
  * Clean storage function
  */
-let cleanStorage = () => {
-    chrome.storage.local.remove(urlStorage);
-    chrome.storage.local.remove(versionStorage);
+let cleanStorage = (storage, callback) => {
+    chrome.storage.local.remove(storage, function () {
+        callback();
+    });
 };
 
 /**
@@ -150,9 +210,8 @@ let setupEvents = function () {
     setupChangeEvent(environmentSelector, defaultUrl, 'URLChange');
     setupChangeEvent(versionPathSelector, defaultVersionPath, 'versionPathChange');
     setupSubmitEvent();
+    setupButtonClickEvents();
 };
 
-// Setup dropdowns
-fillEnvironmentAndVersionList();
-// Setup selectors
+// Setup everything
 setupEvents();

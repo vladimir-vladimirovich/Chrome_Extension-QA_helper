@@ -1,58 +1,80 @@
 <html>
-    <head>
-        <link rel="stylesheet" type="text/css" href="styles.css">
-    </head>
+<head>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
 
-    <body>
-        <form id="envSelectorForm">
-            <table align="center">
-                <tr>
-                    <th>
-                        <input type="radio" name="ENV" value="testUrlStorage">
-                    </th>
-                    <th>
-                        <input type="radio" name="ENV" value="stgUrlStorage">
-                    </th>
-                    <th>
-                        <input type="radio" name="ENV"  value="prodUrlStorage">
-                    </th>
-                </tr>
-                <tr>
-                    <td>TST</td>
-                    <td>STG</td>
-                    <td>PROD</td>
-                </tr>
-            </table>
+<body>
+<form id="envSelectorForm">
+    <table align="center">
+        <tr>
+            <th>
+                <input type="radio" name="envSelector" value="testUrlStorage">
+            </th>
+            <th>
+                <input type="radio" name="envSelector" value="stgUrlStorage">
+            </th>
+            <th>
+                <input type="radio" name="envSelector"  value="prodUrlStorage">
+            </th>
+        </tr>
+        <tr>
+            <td>TST</td>
+            <td>STG</td>
+            <td>PROD</td>
+        </tr>
+    </table>
 
-            <h3>Current environment</h3>
-            <select id="environmentSelector">Selector</select>
-            <h3>Current version path</h3>
-            <select id="versionPathSelector">Selector</select>
-        </form>
+    <h3>Current environment</h3>
+    <select id="environmentSelector">Selector</select>
+    <h3>Current version path</h3>
+    <select id="versionPathSelector">Selector</select>
+</form>
 
-        <form id="addEnvUrlForm">
-            <h3>Add URL to list</h3>
+<form id="addEnvUrlForm">
+    <table align="center">
+        <tr>
+            <th>
+                <input type="radio" name="envInput" value="testUrlStorage" checked="checked">
+            </th>
+            <th>
+                <input type="radio" name="envInput" value="stgUrlStorage">
+            </th>
+            <th>
+                <input type="radio" name="envInput"  value="prodUrlStorage">
+            </th>
+        </tr>
+        <tr>
+            <td>TST</td>
+            <td>STG</td>
+            <td>PROD</td>
+        </tr>
+    </table>
 
-            <label for="addUrl">Add URL:</label>
-            <input id="addUrl" name="Environment URL">
+    <h3>Add URL to list</h3>
 
-            <input type="submit" value="Add">
-        </form>
+    <label for="addUrl">Add URL:</label>
+    <input id="addUrl" name="Environment URL">
 
-        <form id="addVersionPathForm">
-            <h3>Add version path to list</h3>
+    <input type="submit" value="Add">
+</form>
 
-            <label for="addVersionPath">Add version.json path(in format /...)</label>
-            <input id="addVersionPath" name="Version path">
+<form id="addVersionPathForm">
+    <h3>Add version path to list</h3>
 
-            <input type="submit" value="Add">
-        </form>
+    <label for="addVersionPath">Add version.json path(in format /...)</label>
+    <input id="addVersionPath" name="Version path">
 
-        <form id="cleanStorage">
-            <h3>Clean URL and version path storage's</h3>
-            <input type="submit" value="Clean storage">
-        </form>
+    <input type="submit" value="Add">
+</form>
 
-        <script type="text/javascript" src="popup.js"></script>
-    </body>
+<form id="cleanStorage">
+    <h3>Clean URL and version path storage's</h3>
+    <input id="cleanTestUrlStorage" type="submit" value="Test">
+    <input id="cleanStgUrlStorage" type="submit" value="STG">
+    <input id="cleanProdUrlStorage" type="submit" value="Prod">
+    <input id="cleanVersionPaths" type="submit" value="Versions">
+</form>
+
+<script type="text/javascript" src="popup.js"></script>
+</body>
 </html>
