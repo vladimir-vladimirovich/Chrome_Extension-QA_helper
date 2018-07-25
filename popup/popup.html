@@ -8,13 +8,19 @@
     <table align="center">
         <tr>
             <th>
-                <input type="radio" name="envSelector" value="testUrlStorage">
+                <label>
+                    <input type="radio" name="envSelector" value="testUrlStorage">
+                </label>
             </th>
             <th>
-                <input type="radio" name="envSelector" value="stgUrlStorage">
+                <label>
+                    <input type="radio" name="envSelector" value="stgUrlStorage">
+                </label>
             </th>
             <th>
-                <input type="radio" name="envSelector"  value="prodUrlStorage">
+                <label>
+                    <input type="radio" name="envSelector" value="prodUrlStorage">
+                </label>
             </th>
         </tr>
         <tr>
@@ -25,22 +31,33 @@
     </table>
 
     <h3>Current environment</h3>
+    <label for="environmentSelector"></label>
     <select id="environmentSelector">Selector</select>
+    <button id="deleteSelectedEnvButton">Delete env</button>
+
     <h3>Current version path</h3>
+    <label for="versionPathSelector"></label>
     <select id="versionPathSelector">Selector</select>
+    <button id="deleteSelectedVersionButton">Delete version</button>
 </form>
 
 <form id="addEnvUrlForm">
     <table align="center">
         <tr>
             <th>
-                <input type="radio" name="envInput" value="testUrlStorage" checked="checked">
+                <label>
+                    <input type="radio" name="envInput" value="testUrlStorage" checked="checked">
+                </label>
             </th>
             <th>
-                <input type="radio" name="envInput" value="stgUrlStorage">
+                <label>
+                    <input type="radio" name="envInput" value="stgUrlStorage">
+                </label>
             </th>
             <th>
-                <input type="radio" name="envInput"  value="prodUrlStorage">
+                <label>
+                    <input type="radio" name="envInput" value="prodUrlStorage">
+                </label>
             </th>
         </tr>
         <tr>

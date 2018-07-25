@@ -8,6 +8,9 @@ let cleanStgUrlStorageButton = document.getElementById('cleanStgUrlStorage');
 let cleanProdUrlStorageButton = document.getElementById('cleanProdUrlStorage');
 let cleanVersionPaths = document.getElementById('cleanVersionPaths');
 
+let deleteSelectedEnvButton = document.getElementById("deleteSelectedEnvButton");
+let deleteSelectedVersionButton = document.getElementById("deleteSelectedVersionButton");
+
 let testUrlStorage = "testUrlStorage";
 let stgUrlStorage = "stgUrlStorage";
 let prodUrlStorage = "prodUrlStorage";
@@ -17,7 +20,6 @@ let envInput = document.getElementsByName('envInput');
 
 let defaultUrl = 'defaultURL';
 let defaultVersionPath = 'defaultVersionPath';
-let urlStorage = 'urlStorage';
 let versionStorage = 'versionStorage';
 let currentEnvironmentGroup = 'currentEnvironmentGroup';
 
@@ -25,8 +27,8 @@ let currentEnvironmentGroup = 'currentEnvironmentGroup';
  * Setup events for radio buttons
  */
 let setupRadioButtonClickEvents = () => {
-    for(let i = 0; i < envSelector.length; i++) {
-        envSelector[i].onclick = function() {
+    for (let i = 0; i < envSelector.length; i++) {
+        envSelector[i].onclick = function () {
             initializeEnvironmentList(environmentSelector, envSelector[i].value, defaultUrl);
         }
     }
@@ -38,8 +40,8 @@ let setupRadioButtonClickEvents = () => {
 let initializeEnvironmentGroup = function () {
     chrome.storage.local.get([currentEnvironmentGroup], function (result) {
         let storage;
-        for(let i = 0; i < envSelector.length; i++) {
-            if(result.currentEnvironmentGroup === envSelector[i].value) {
+        for (let i = 0; i < envSelector.length; i++) {
+            if (result.currentEnvironmentGroup === envSelector[i].value) {
                 envSelector[i].checked = true;
                 storage = envSelector[i].value;
             }
@@ -60,7 +62,7 @@ setupRadioButtonClickEvents();
  */
 let getCheckedRadioButton = (element) => {
     for (let i = 0; i < element.length; i++) {
-        if(element[i].checked) {
+        if (element[i].checked) {
             console.log("Active env: " + element[i].value);
             return element[i].value;
         } else console.log("There are no checked radio button in environment adding area");
@@ -77,12 +79,12 @@ let initializeEnvironmentList = function (selector, storage, defaultStorage) {
     chrome.storage.local.get([storage], function (result) {
         console.log("[-_-] Adding items to URL list...");
         selector.options.length = 0;
-        if(result[storage] === undefined) {
+        if (result[storage] === undefined) {
             let emptyOption = document.createElement('option');
             emptyOption.text = "Nothing to display";
             selector.add(emptyOption);
         } else {
-            for(let i = 0; i < result[storage].length; i++) {
+            for (let i = 0; i < result[storage].length; i++) {
                 let option = document.createElement('option');
                 option.text = result[storage][i];
                 selector.add(option);
@@ -122,8 +124,8 @@ let setupSubmitEvent = () => {
         let inputEnv = getCheckedRadioButton(envInput);
         let selectorEnv = getCheckedRadioButton(envSelector);
 
-        updateStorageWithUrl(inputEnv, addedUrl,() => {
-            if(inputEnv === selectorEnv) {
+        updateStorageWithUrl(inputEnv, addedUrl, () => {
+            if (inputEnv === selectorEnv) {
                 initializeEnvironmentList(environmentSelector, inputEnv, defaultUrl);
             }
         });
@@ -137,7 +139,7 @@ let setupSubmitEvent = () => {
 
         updateStorageWithUrl(versionStorage, addedVersionPath);
 
-        updateStorageWithUrl(versionStorage, addedVersionPath,() => {
+        updateStorageWithUrl(versionStorage, addedVersionPath, () => {
             initializeEnvironmentList(versionPathSelector, versionStorage, defaultVersionPath);
         });
     });
@@ -147,11 +149,24 @@ let setupSubmitEvent = () => {
  * Setup click events for clean storage buttons
  */
 let setupButtonClickEvents = () => {
-    setupButtonClickEvent(cleanTestUrlStorageButton, testUrlStorage);
-    setupButtonClickEvent(cleanStgUrlStorageButton, stgUrlStorage);
-    setupButtonClickEvent(cleanProdUrlStorageButton, prodUrlStorage);
+    setupButtonClickEvent(cleanTestUrlStorageButton, testUrlStorage, function () {
+        initializeEnvironmentList(environmentSelector, testUrlStorage, defaultUrl)
+    });
+    setupButtonClickEvent(cleanStgUrlStorageButton, stgUrlStorage, function () {
+        initializeEnvironmentList(environmentSelector, stgUrlStorage, defaultUrl)
+    });
+    setupButtonClickEvent(cleanProdUrlStorageButton, prodUrlStorage, function () {
+        initializeEnvironmentList(environmentSelector, prodUrlStorage, defaultUrl)
+    });
     setupButtonClickEvent(cleanVersionPaths, versionStorage, function () {
         initializeEnvironmentList(versionPathSelector, versionStorage, defaultVersionPath);
+    });
+
+    deleteSelectedEnvButton.addEventListener('click', function () {
+        removeSelectorValue(environmentSelector, 'environment');
+    });
+    deleteSelectedVersionButton.addEventListener('click', function () {
+        removeSelectorValue(versionPathSelector, 'version');
     });
 };
 
@@ -179,16 +194,16 @@ let setupButtonClickEvent = (button, storageUrl, callback) => {
  */
 let updateStorageWithUrl = function (storageLink, url, callback) {
     chrome.storage.local.get([storageLink], function (result) {
-        if(result[storageLink] && url !== "") {
+        if (result[storageLink] && url !== "") {
             let newArrayIf = result[storageLink];
             newArrayIf.push(url);
             chrome.storage.local.set({[storageLink]: newArrayIf})
-        } else if(!result[storageLink] && url !== "") {
+        } else if (!result[storageLink] && url !== "") {
             let newArrayElse = [url];
             chrome.storage.local.set({[storageLink]: newArrayElse})
         } else console.log("[-_-] Entry field is empty or unknown error while trying to chrome.storage.local.get");
 
-        if(callback) {
+        if (callback) {
             callback();
         }
     });
@@ -201,6 +216,33 @@ let cleanStorage = (storage, callback) => {
     chrome.storage.local.remove(storage, function () {
         callback();
     });
+};
+
+
+/**
+ * Removes values from selector and saves result into storage
+ * @param {Element} selectorList
+ * @param {String} selectorType
+ */
+let removeSelectorValue = (selectorList, selectorType) => {
+    // Remove current selected value
+    selectorList.options[selectorList.selectedIndex].remove();
+
+    // Array of objects of options from selector
+    let optionsArray = Object.values(selectorList);
+
+    // New array of string values
+    let newOptionsValuesArray = optionsArray.map(function (optionsArray) {
+        return optionsArray.value;
+    });
+
+    // Saves remaining options into selected environment group storage or version storage
+    if (selectorType === 'environment') {
+        let currentEnvGroup = getCheckedRadioButton(envSelector);
+        chrome.storage.local.set({[currentEnvGroup]: newOptionsValuesArray})
+    } else if (selectorType === 'version') {
+        chrome.storage.local.set({[versionStorage]: newOptionsValuesArray})
+    }
 };
 
 /**
