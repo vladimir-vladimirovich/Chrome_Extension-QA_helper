@@ -30,7 +30,8 @@ export default {
 
         // ERROR handler
         xhr.onerror = function() {
-            console.log( '[-_-] XMLHttpRequest ERROR: ' + this.status );
+            // console.log( '[-_-] XMLHttpRequest ERROR: ' + this.status );
+            callback("Bad XMLHttpResponse... :(");
         };
 
         // Send request
