@@ -102,7 +102,7 @@ let initializeEnvironmentList = function (selector, storage, defaultStorage) {
  * @param element
  * @param storage
  * @param message
- * @param update
+ * @param updateContextMenu
  */
 let setupChangeEvent = function (element, storage, message, updateContextMenu) {
     element.addEventListener('change', function (element) {
