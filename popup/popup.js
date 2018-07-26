@@ -102,14 +102,21 @@ let initializeEnvironmentList = function (selector, storage, defaultStorage) {
  * @param element
  * @param storage
  * @param message
+ * @param updateContextMenu
  */
-let setupChangeEvent = function (element, storage, message) {
+let setupChangeEvent = function (element, storage, message, updateContextMenu) {
     element.addEventListener('change', function (element) {
         let activeEnv = getCheckedRadioButton(envSelector);
         chrome.storage.local.set({[storage]: element.target.value});
         chrome.runtime.sendMessage({[message]: element.target.value});
 
         chrome.storage.local.set({[currentEnvironmentGroup]: activeEnv});
+
+        if (updateContextMenu) {
+            chrome.contextMenus.update("CPH", {
+                "title": `CPH: [${element.target.value}]`
+            });
+        }
     });
 };
 
@@ -249,7 +256,7 @@ let removeSelectorValue = (selectorList, selectorType) => {
  * Setup events listeners for all selectors
  */
 let setupEvents = function () {
-    setupChangeEvent(environmentSelector, defaultUrl, 'URLChange');
+    setupChangeEvent(environmentSelector, defaultUrl, 'URLChange', true);
     setupChangeEvent(versionPathSelector, defaultVersionPath, 'versionPathChange');
     setupSubmitEvent();
     setupButtonClickEvents();
