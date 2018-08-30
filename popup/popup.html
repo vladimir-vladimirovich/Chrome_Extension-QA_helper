@@ -1,97 +1,235 @@
+<!DOCTYPE html>
 <html>
 <head>
-    <link rel="stylesheet" type="text/css" href="styles.css">
+    <link rel="stylesheet" type="text/css" href="libs/bootstrap-4.1.3-dist/css/bootstrap.min.css">
 </head>
-
 <body>
-<form id="envSelectorForm">
-    <table align="center">
-        <tr>
-            <th>
-                <label>
-                    <input type="radio" name="envSelector" value="testUrlStorage">
+<div style="width: 330px" class="mx-auto">
+    <div class="col-md-12">
+        <ul class="nav nav-tabs" id="topNavigation" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="environmentTab" data-toggle="tab" href="#environmentPage" role="tab">Environment</a>
+            </li>
+            <!--<li class="nav-item">-->
+                <!--<a class="nav-link" id="customCommentTab" data-toggle="tab" href="#customCommentPage" role="tab">Custom-->
+                    <!--comment</a>-->
+            <!--</li>-->
+        </ul>
+    </div>
+
+    <div class="tab-content">
+        <!--Environment selector tab-->
+
+        <div class="container tab-pane fade show active mb-3" id="environmentPage" role="tabpanel">
+
+            <!--Environment group selector: TST STG PROD-->
+
+            <div class="btn-toolbar btn-group-toggle mt-2" data-toggle="buttons">
+                <label class="btn btn-success mx-auto my-1">
+                    <input type="radio" name="environmentGroupRadio" id="option1" autocomplete="off"
+                           value="testUrlStorage">TST
                 </label>
-            </th>
-            <th>
-                <label>
-                    <input type="radio" name="envSelector" value="stgUrlStorage">
+                <label class="btn btn-success mx-auto my-1">
+                    <input type="radio" name="environmentGroupRadio" id="option2" autocomplete="off"
+                           value="stgUrlStorage">STG
                 </label>
-            </th>
-            <th>
-                <label>
-                    <input type="radio" name="envSelector" value="prodUrlStorage">
+                <label class="btn btn-success mx-auto my-1">
+                    <input type="radio" name="environmentGroupRadio" id="option3" autocomplete="off"
+                           value="prodUrlStorage">PROD
                 </label>
-            </th>
-        </tr>
-        <tr>
-            <td>TST</td>
-            <td>STG</td>
-            <td>PROD</td>
-        </tr>
-    </table>
+            </div>
 
-    <h3>Current environment</h3>
-    <label for="environmentSelector"></label>
-    <select id="environmentSelector">Selector</select>
-    <button id="deleteSelectedEnvButton">Delete env</button>
+            <!--Environment DIV -->
 
-    <h3>Current version path</h3>
-    <label for="versionPathSelector"></label>
-    <select id="versionPathSelector">Selector</select>
-    <button id="deleteSelectedVersionButton">Delete version</button>
-</form>
+            <div class="container">
+                <label for="environmentSelector" class="mt-2">Environment</label>
+                <div class="input-group">
+                    <select class="custom-select" id="environmentSelector">
 
-<form id="addEnvUrlForm">
-    <table align="center">
-        <tr>
-            <th>
-                <label>
-                    <input type="radio" name="envInput" value="testUrlStorage" checked="checked">
-                </label>
-            </th>
-            <th>
-                <label>
-                    <input type="radio" name="envInput" value="stgUrlStorage">
-                </label>
-            </th>
-            <th>
-                <label>
-                    <input type="radio" name="envInput" value="prodUrlStorage">
-                </label>
-            </th>
-        </tr>
-        <tr>
-            <td>TST</td>
-            <td>STG</td>
-            <td>PROD</td>
-        </tr>
-    </table>
+                    </select>
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-danger" type="button" id="deleteSelectedEnvButton">-</button>
+                        <button class="btn btn-outline-secondary" type="button" data-toggle="collapse"
+                                data-target="#addEnvironmentCollapse">+
+                        </button>
+                    </div>
+                </div>
 
-    <h3>Add URL to list</h3>
+                <div class="input-group mt-2 collapse" id="addEnvironmentCollapse">
+                    <input type="text" class="form-control" placeholder="https://..."
+                           aria-label="Recipient's username"
+                           aria-describedby="basic-addon2">
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-success" type="button" id="addEnvironment">+</button>
+                    </div>
+                </div>
+            </div>
 
-    <label for="addUrl">Add URL:</label>
-    <input id="addUrl" name="Environment URL">
+            <!--Version DIV-->
 
-    <input type="submit" value="Add">
-</form>
+            <div class="container">
+                <label for="versionPathSelector" class="mt-2">Version</label>
+                <div class="input-group">
+                    <select class="custom-select" id="versionPathSelector">
+                        <option selected>Choose version</option>
+                        <option value="1">/buzz-theme/version.json</option>
+                    </select>
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-danger" type="button" id="deleteSelectedVersionButton">-</button>
+                        <button class="btn btn-outline-secondary" type="button" data-toggle="collapse"
+                                data-target="#addVersionCollapse">+
+                        </button>
+                    </div>
+                </div>
 
-<form id="addVersionPathForm">
-    <h3>Add version path to list</h3>
+                <div class="input-group mt-2 collapse" id="addVersionCollapse">
+                    <input type="text" class="form-control" placeholder="/html/...">
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-success" type="button" id="addVersion">+</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    <label for="addVersionPath">Add version.json path(in format /...)</label>
-    <input id="addVersionPath" name="Version path">
+        <!--Custom comment tab-->
 
-    <input type="submit" value="Add">
-</form>
+        <!--<div class="container tab-pane fade" id="customCommentPage" role="tablist">-->
 
-<form id="cleanStorage">
-    <h3>Clean URL and version path storage's</h3>
-    <input id="cleanTestUrlStorage" type="submit" value="Test">
-    <input id="cleanStgUrlStorage" type="submit" value="STG">
-    <input id="cleanProdUrlStorage" type="submit" value="Prod">
-    <input id="cleanVersionPaths" type="submit" value="Versions">
-</form>
+            <!--<ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">-->
+                <!--<li class="nav-item">-->
+                    <!--<a class="nav-link active" id="passPill" data-toggle="pill" href="#commentArea" role="tab"-->
+                       <!--aria-controls="pills-home" aria-selected="true">Pass</a>-->
+                <!--</li>-->
+                <!--<li class="nav-item">-->
+                    <!--<a class="nav-link" id="failPill" data-toggle="pill" href="#commentArea" role="tab"-->
+                       <!--aria-controls="pills-profile" aria-selected="false">Fail</a>-->
+                <!--</li>-->
+                <!--<li class="nav-item">-->
+                    <!--<a class="nav-link" id="midStatePill" data-toggle="pill" href="#commentArea" role="tab"-->
+                       <!--aria-controls="pills-contact" aria-selected="false">MidState</a>-->
+                <!--</li>-->
+                <!--<li class="nav-item">-->
+                    <!--<a class="nav-link" id="descriptionPill" data-toggle="pill" href="#descriptionArea" role="tab"-->
+                       <!--aria-controls="pills-contact" aria-selected="false">Description</a>-->
+                <!--</li>-->
 
-<script type="text/javascript" src="popup.js"></script>
+            <!--</ul>-->
+
+            <!--<hr>-->
+
+            <!--<div class="tab-content" id="commentTabContent">-->
+                <!--&lt;!&ndash;Comments area&ndash;&gt;-->
+
+                <!--<div class="tab-pane fade show active" id="commentArea" role="tabpanel">-->
+                    <!--&lt;!&ndash;Test status&ndash;&gt;-->
+
+                    <!--<label for="testStatus" class="mt-2">Test status</label>-->
+                    <!--<div class="input-group" id="testStatus">-->
+                        <!--<input type="text" class="form-control" placeholder="test status">-->
+                        <!--<div class="input-group-append">-->
+                            <!--<button class="btn btn-outline-success" type="button">apply</button>-->
+                        <!--</div>-->
+                    <!--</div>-->
+
+                    <!--&lt;!&ndash;Test scope/Notes&ndash;&gt;-->
+
+                    <!--<label for="testScope" class="mt-2">Test scope/notes</label>-->
+                    <!--<div class="input-group" id="testScope">-->
+                        <!--<textarea class="form-control" placeholder="test scope"></textarea>-->
+                        <!--<div class="input-group-append">-->
+                            <!--<button class="btn btn-outline-success" type="button">apply</button>-->
+                        <!--</div>-->
+                    <!--</div>-->
+                <!--</div>-->
+
+                <!--&lt;!&ndash;Description area&ndash;&gt;-->
+
+                <!--<div class="tab-pane fade" id="descriptionArea" role="tabpanel">-->
+                    <!--&lt;!&ndash;Steps To Reproduce&ndash;&gt;-->
+
+                    <!--<label for="STR" class="mt-2">Steps To Reproduce</label>-->
+                    <!--<div class="input-group" id="STR">-->
+                        <!--<textarea class="form-control" placeholder="steps to reproduce"></textarea>-->
+                        <!--<div class="input-group-append">-->
+                            <!--<button class="btn btn-outline-success" type="button">apply</button>-->
+                        <!--</div>-->
+                    <!--</div>-->
+
+                    <!--&lt;!&ndash;Actual Result&ndash;&gt;-->
+
+                    <!--<label for="AR" class="mt-2">Actual Result</label>-->
+                    <!--<div class="input-group" id="AR">-->
+                        <!--<textarea class="form-control" placeholder="actual result"></textarea>-->
+                        <!--<div class="input-group-append">-->
+                            <!--<button class="btn btn-outline-success" type="button">apply</button>-->
+                        <!--</div>-->
+                    <!--</div>-->
+
+                    <!--&lt;!&ndash;Expected Result&ndash;&gt;-->
+
+                    <!--<label for="AR" class="mt-2">Expceted Result</label>-->
+                    <!--<div class="input-group" id="ER">-->
+                        <!--<textarea class="form-control" placeholder="expected result"></textarea>-->
+                        <!--<div class="input-group-append">-->
+                            <!--<button class="btn btn-outline-success" type="button">apply</button>-->
+                        <!--</div>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</div>-->
+
+            <!--&lt;!&ndash;Custom devices area&ndash;&gt;-->
+
+            <!--<div>-->
+                <!--<hr class="mt-4">-->
+
+                <!--&lt;!&ndash;Title&ndash;&gt;-->
+
+                <!--<h2 class="col-md-12">Devices WIP</h2>-->
+
+                <!--&lt;!&ndash;Add device input&ndash;&gt;-->
+
+                <!--<label for="addDeviceInput">Add device</label>-->
+                <!--<div class="input-group mb-4">-->
+                    <!--<input type="text" class="form-control" placeholder="Desktop # Win10 # Chrome" id="addDeviceInput">-->
+                    <!--<div class="input-group-append">-->
+                        <!--<button class="btn btn-outline-success" type="button">+</button>-->
+                    <!--</div>-->
+                <!--</div>-->
+
+                <!--&lt;!&ndash;Device list&ndash;&gt;-->
+
+                <!--<div class="list-group mt-2 mb-3">-->
+                    <!--<div class="btn-group my-1">-->
+                        <!--<a class="list-group-item list-group-item-action flex-column">Desktop # Win10 # Chrome</a>-->
+                        <!--<button class="btn btn-outline-danger">-</button>-->
+                    <!--</div>-->
+
+                    <!--<div class="btn-group my-1">-->
+                        <!--<a class="list-group-item list-group-item-action list-group-item-success flex-column active">SG-->
+                            <!--S6 # Android 7.0 # Chrome</a>-->
+                        <!--<button class="btn btn-outline-danger">-</button>-->
+                    <!--</div>-->
+
+                    <!--<div class="btn-group my-1">-->
+                        <!--<a class="list-group-item list-group-item-action">iPhone 6 # iOS 10.3.1 # Safari</a>-->
+                        <!--<button class="btn btn-outline-danger">-</button>-->
+                    <!--</div>-->
+
+                <!--</div>-->
+            <!--</div>-->
+
+        <!--</div>-->
+    </div>
+</div>
+
+<!--Bootstrap, jQuery, Popper-->
+
+<script src="libs/jquery-3.3.1.min.js"></script>
+<script src="libs/popper.min.js"></script>
+<script src="libs/bootstrap-4.1.3-dist/js/bootstrap.min.js"></script>
+
+<!--Main-->
+
+<script type="module" src="main.js"></script>
 </body>
 </html>

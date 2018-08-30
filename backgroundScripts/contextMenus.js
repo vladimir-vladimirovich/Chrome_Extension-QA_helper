@@ -1,4 +1,4 @@
-import { menuCollection } from "./templates/menuCollection.js";
+import {menuCollection} from "./templates/menuCollection.js";
 
 let contextMenus = {};
 
@@ -16,7 +16,9 @@ contextMenus.addMenuItem = (menuItem) => {
  */
 contextMenus.addMultipleItems = function () {
     let array = Object.values(menuCollection);
-    array.map((t) => {this.addMenuItem(t)})
+    array.map((t) => {
+        this.addMenuItem(t)
+    })
 };
 
 export {contextMenus};
