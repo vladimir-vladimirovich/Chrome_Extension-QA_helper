@@ -26,13 +26,12 @@ contextMenus.addMultipleItems = function () {
  */
 contextMenus.updateCurrentEnvironment = function () {
     chrome.storage.local.get(["defaultURL"], function (result) {
-
         if (result.defaultURL === null || result.defaultURL === undefined) {
-            result = "";
+            result.defaultURL = "";
         }
 
         chrome.contextMenus.update("QAA", {
-            "title": `QAA ${result.defaultURL}`
+            "title": `QAA [${result.defaultURL}]`
         });
     });
 };
