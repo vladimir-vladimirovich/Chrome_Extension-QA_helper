@@ -1,4 +1,5 @@
 import {environment} from "../config/projectProperties.js";
+import {contextMenus} from "../contextMenus.js"
 
 let checkDefaultURL = () => {
     chrome.storage.local.get(['defaultURL'], function (result) {
@@ -32,6 +33,8 @@ export default {
             if(request.versionPathChange) {
                 environment.defaultFEJSONPass = request.versionPathChange;
             }
+
+            contextMenus.updateCurrentEnvironment();
         });
 
         checkDefaultURL();
