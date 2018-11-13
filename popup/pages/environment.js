@@ -166,6 +166,10 @@ let removeSelectorValue = (selectorList, storage) => {
 
     // New array of string values
     let newOptionsValuesArray = optionsArray.map(function (optionsArray) {
+        console.log(">>> newOptionsValuesArray");
+        console.log(optionsArray.value);
+        // if()
+
         return optionsArray.value;
     });
 
