@@ -3,15 +3,15 @@ export let menuCollection = {
      * This file contains configuration for context menus
      */
     CPH: {
-        "id": "CPH",
-        "title": "CPH",
+        "id": "QAA",
+        "title": "QAA",
         "contexts": ["all"]
     },
     comments: {
         "id": "comments",
         "title": "comments>",
         "contexts": ["all"],
-        "parentId": "CPH"
+        "parentId": "QAA"
     },
     passed: {
         "id": "commentPassed",
@@ -35,6 +35,6 @@ export let menuCollection = {
         "id": "description",
         "title": "description",
         "contexts": ["all"],
-        "parentId": "CPH"
+        "parentId": "QAA"
     }
 };

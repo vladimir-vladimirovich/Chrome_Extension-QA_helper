@@ -21,4 +21,20 @@ contextMenus.addMultipleItems = function () {
     })
 };
 
+/**
+ * Call this function to trigger current environment link update in context menu
+ */
+contextMenus.updateCurrentEnvironment = function () {
+    chrome.storage.local.get(["defaultURL"], function (result) {
+
+        if (result.defaultURL === null || result.defaultURL === undefined) {
+            result = "";
+        }
+
+        chrome.contextMenus.update("QAA", {
+            "title": `QAA ${result.defaultURL}`
+        });
+    });
+};
+
 export {contextMenus};

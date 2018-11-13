@@ -164,9 +164,12 @@ let removeSelectorValue = (selectorList, storage) => {
     // Array of objects of options from selector
     let optionsArray = Object.values(selectorList);
 
+    // Pre filter in order to remove event object
+    optionsArray = optionsArray.filter(filteredArray => filteredArray.value);
+
     // New array of string values
-    let newOptionsValuesArray = optionsArray.map(function (optionsArray) {
-        return optionsArray.value;
+    let newOptionsValuesArray = optionsArray.map(function (opt) {
+        return opt.value;
     });
 
     if (newOptionsValuesArray[0] === undefined) {
@@ -186,3 +189,8 @@ let getCheckedRadioValue = function (element) {
 };
 
 export {initializeEnvironmentGroup, setupEvents}
+
+
+// let environmentSelector = document.getElementById('environmentSelector');
+// environmentSelector.options[environmentSelector.selectedIndex]
+// let optionsArray = Object.values(environmentSelector);
