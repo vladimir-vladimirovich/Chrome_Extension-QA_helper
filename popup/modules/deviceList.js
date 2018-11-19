@@ -90,6 +90,8 @@ let buildDeviceList = function (deviceList) {
                     listItemSpan.addClass(cssClassForSelectedDevice);
                     addSelectedDeviceIdToStorage(deviceList[i]);
                 }
+
+
             });
 
             // Add event for '-' remove button. Removes device from list and UI update
@@ -100,6 +102,7 @@ let buildDeviceList = function (deviceList) {
                     // console.log("*** updatedArray: ");
                     // console.log(updatedArray);
                     chrome.storage.local.set({[deviceListStorage]: updatedArray});
+                    removeDeselectedDeviceIdFromStorage(deviceList[i]);
                 })
             });
 
@@ -118,7 +121,8 @@ let removeDeselectedDeviceIdFromStorage = (deviceId) => {
             // Remove deselected element from array
             let filteredArray = result.selectedDevicesStorage.filter(filterArray => filterArray !== deviceId);
             // Update storage with new array
-            chrome.storage.local.set({[selectedDevicesStorage]: filteredArray})
+            chrome.storage.local.set({[selectedDevicesStorage]: filteredArray});
+            chrome.runtime.sendMessage({['deviceListChange']: filteredArray});
         }
     })
 };
@@ -142,6 +146,7 @@ let addSelectedDeviceIdToStorage = (deviceId) => {
         }
 
         chrome.storage.local.set({[selectedDevicesStorage]: updatedArray});
+        chrome.runtime.sendMessage({['deviceListChange']: updatedArray});
     })
 };
 
@@ -189,6 +194,8 @@ export {setupDeviceList}
 
 // chrome.storage.local.remove('deviceListStorage')
 
-// chrome.storage.local.get(['deviceListStorage'], function(result) {
-//     console.log(result.deviceListStorage);
+// chrome.storage.local.get(['selectedDevicesStorage'], function(result) {
+//     console.log(result.selectedDevicesStorage);
 // });
+
+// chrome.storage.local.remove(['selectedDevicesStorage'])

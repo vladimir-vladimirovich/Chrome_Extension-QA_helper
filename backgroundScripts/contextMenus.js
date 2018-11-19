@@ -36,4 +36,8 @@ contextMenus.updateCurrentEnvironment = function () {
     });
 };
 
+contextMenus.updateDeviceList = function () {
+
+};
+
 export {contextMenus};

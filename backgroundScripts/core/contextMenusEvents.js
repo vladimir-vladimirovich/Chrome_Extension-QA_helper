@@ -13,11 +13,22 @@ import RequestHandler from "./requestHandler.js";
 // To be moved outside this file
 let combineStrings = (id, text, version) => {
     if (id.includes('comment')) {
-        return `${text}${environment.defaultEnvironmentURL} | \n${customComments.commentVersionStart}${version}${customComments.commentVersionEnd}`;
+        return `${text}` +
+            `${customComments.commentDevicesStart}${customComments.devices}${customComments.commentEndLine}` +
+            `${customComments.commentEnvironmentURLStart}${environment.defaultEnvironmentURL} | \n` +
+            `${customComments.commentVersionStart}${version}${customComments.commentVersionEnd}`;
     } else {
         return `*STR:*\n# Open ${environment.defaultEnvironmentURL}\n${text}${environment.defaultEnvironmentURL}\n${version}`;
     }
 };
+// // To be moved outside this file
+// let combineStrings = (id, text, version) => {
+//     if (id.includes('comment')) {
+//         return `${text}${environment.defaultEnvironmentURL} | \n${customComments.commentVersionStart}${version}${customComments.commentVersionEnd}`;
+//     } else {
+//         return `*STR:*\n# Open ${environment.defaultEnvironmentURL}\n${text}${environment.defaultEnvironmentURL}\n${version}`;
+//     }
+// };
 
 /**
  * 1. This method connects different menu items to text that will be pasted after click on them
@@ -33,8 +44,8 @@ let addOnClickHandler = ({ id, text }) => {
         }
 
         chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-            RequestHandler.getVersionJSON((parsedStr) => {
-                let result = combineStrings(id, text, parsedStr);
+            RequestHandler.getVersionJSON((parsedVersion) => {
+                let result = combineStrings(id, text, parsedVersion);
                 chrome.tabs.sendMessage(tabs[0].id, {onClick: result})
             });
         });

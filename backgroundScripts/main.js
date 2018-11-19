@@ -18,6 +18,7 @@ let setup = () => {
 
     // Update QAA context menu with active environment
     contextMenus.updateCurrentEnvironment();
+
 };
 
 setup();
