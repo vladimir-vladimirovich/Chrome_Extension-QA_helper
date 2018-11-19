@@ -67,7 +67,7 @@ let setupDropdown = function (selector, storage, defaultStorage) {
 /**
  * Setup click events for clean storage buttons
  */
-let setupEvents = function () {
+let setupEnvironmentEvents = function () {
     $(deleteSelectedEnvButton).click(function () {
         let currentEnvGroup = getCheckedRadioValue(environmentGroupRadio);
         removeSelectorValue(environmentSelector, currentEnvGroup)
@@ -188,8 +188,7 @@ let getCheckedRadioValue = function (element) {
     return $(element).parent('.active')[0].children[0].value;
 };
 
-export {initializeEnvironmentGroup, setupEvents}
-
+export {initializeEnvironmentGroup, setupEnvironmentEvents}
 
 // let environmentSelector = document.getElementById('environmentSelector');
 // environmentSelector.options[environmentSelector.selectedIndex]
