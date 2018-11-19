@@ -1,5 +1,8 @@
+// --- STORAGE VARIABLES ---
 // Place to keep device list
 let deviceListStorage = 'deviceListStorage';
+// Place to keep selected devices
+let selectedDevices = 'selectedDevices';
 
 let addDeviceButton = document.getElementById('addDeviceButton');
 let addDeviceInput = document.getElementById('addDeviceInput');
@@ -76,14 +79,18 @@ let buildDeviceList = function (deviceList) {
             let listItemSpan = $(listItem).find('span');
             listItemSpan[0].innerText = deviceList[i];
 
-            // Add event click for span element
+            // Add event click for span element. Select/deselect device and UI update
             listItemSpan.click(function () {
                 if (listItemSpan.hasClass('list-group-item-success')) {
-                    listItemSpan.removeClass('list-group-item-success')
-                } else listItemSpan.addClass('list-group-item-success');
+                    listItemSpan.removeClass('list-group-item-success');
+                    removeDeselectedDeviceIdFromStorage(deviceList[i]);
+                } else {
+                    listItemSpan.addClass('list-group-item-success');
+                    addSelectedDeviceIdToStorage(deviceList[i]);
+                }
             });
 
-            // Add event for '-' remove button
+            // Add event for '-' remove button. Removes device from list and UI update
             $(listItem).find('button').click(function () {
                 listItem.remove();
                 chrome.storage.local.get([deviceListStorage], function (result) {
@@ -95,6 +102,36 @@ let buildDeviceList = function (deviceList) {
             });
         }
     }
+};
+
+/**
+ * Remove deselected deviceId from chrome local storage
+ * @param {String} deviceId
+ */
+let removeDeselectedDeviceIdFromStorage = (deviceId) => {
+    chrome.storage.local.get([selectedDevices], function (result) {
+        if (result.selectedDevices !== undefined) {
+            // Remove deselected element from array
+            let filteredArray = result.selectedDevices.filter(filterArray => filterArray !== deviceId);
+            // Update storage with new array
+            chrome.storage.local.set({[selectedDevices]: filteredArray})
+        }
+    })
+};
+
+/**
+ * Add selected deviceId to chrome local storage
+ * @param {String} deviceId
+ */
+let addSelectedDeviceIdToStorage = (deviceId) => {
+    chrome.storage.local.get([selectedDevices], function (result) {
+        let updatedArray;
+        if (result.selectedDevices !== undefined) {
+            updatedArray = result.selectedDevices;
+        } else updatedArray = [];
+        updatedArray.push(deviceId);
+        chrome.storage.local.set({[selectedDevices]: updatedArray});
+    })
 };
 
 /**
