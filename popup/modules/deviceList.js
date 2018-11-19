@@ -2,10 +2,12 @@
 // Place to keep device list
 let deviceListStorage = 'deviceListStorage';
 // Place to keep selected devices
-let selectedDevices = 'selectedDevices';
+let selectedDevicesStorage = 'selectedDevicesStorage';
 
 let addDeviceButton = document.getElementById('addDeviceButton');
 let addDeviceInput = document.getElementById('addDeviceInput');
+
+let cssClassForSelectedDevice = 'list-group-item-success';
 
 /**
  * Add device string to deviceList pool
@@ -81,11 +83,11 @@ let buildDeviceList = function (deviceList) {
 
             // Add event click for span element. Select/deselect device and UI update
             listItemSpan.click(function () {
-                if (listItemSpan.hasClass('list-group-item-success')) {
-                    listItemSpan.removeClass('list-group-item-success');
+                if (listItemSpan.hasClass(cssClassForSelectedDevice)) {
+                    listItemSpan.removeClass(cssClassForSelectedDevice);
                     removeDeselectedDeviceIdFromStorage(deviceList[i]);
                 } else {
-                    listItemSpan.addClass('list-group-item-success');
+                    listItemSpan.addClass(cssClassForSelectedDevice);
                     addSelectedDeviceIdToStorage(deviceList[i]);
                 }
             });
@@ -100,6 +102,8 @@ let buildDeviceList = function (deviceList) {
                     chrome.storage.local.set({[deviceListStorage]: updatedArray});
                 })
             });
+
+            highlightSelectedDevices();
         }
     }
 };
@@ -109,12 +113,12 @@ let buildDeviceList = function (deviceList) {
  * @param {String} deviceId
  */
 let removeDeselectedDeviceIdFromStorage = (deviceId) => {
-    chrome.storage.local.get([selectedDevices], function (result) {
-        if (result.selectedDevices !== undefined) {
+    chrome.storage.local.get([selectedDevicesStorage], function (result) {
+        if (result.selectedDevicesStorage !== undefined) {
             // Remove deselected element from array
-            let filteredArray = result.selectedDevices.filter(filterArray => filterArray !== deviceId);
+            let filteredArray = result.selectedDevicesStorage.filter(filterArray => filterArray !== deviceId);
             // Update storage with new array
-            chrome.storage.local.set({[selectedDevices]: filteredArray})
+            chrome.storage.local.set({[selectedDevicesStorage]: filteredArray})
         }
     })
 };
@@ -124,13 +128,40 @@ let removeDeselectedDeviceIdFromStorage = (deviceId) => {
  * @param {String} deviceId
  */
 let addSelectedDeviceIdToStorage = (deviceId) => {
-    chrome.storage.local.get([selectedDevices], function (result) {
+    chrome.storage.local.get([selectedDevicesStorage], function (result) {
         let updatedArray;
-        if (result.selectedDevices !== undefined) {
-            updatedArray = result.selectedDevices;
-        } else updatedArray = [];
-        updatedArray.push(deviceId);
-        chrome.storage.local.set({[selectedDevices]: updatedArray});
+        if (result.selectedDevicesStorage === undefined) {
+            updatedArray = [];
+        } else {
+            updatedArray = result.selectedDevicesStorage;
+        }
+
+        // Duplicate check
+        if (!updatedArray.includes(deviceId)) {
+            updatedArray.push(deviceId);
+        }
+
+        chrome.storage.local.set({[selectedDevicesStorage]: updatedArray});
+    })
+};
+
+/**
+ * Highlight selected drop downs
+ */
+let highlightSelectedDevices = () => {
+    chrome.storage.local.get([selectedDevicesStorage], function (result) {
+        if (result.selectedDevicesStorage !== undefined) {
+            for (let i = 0; i < result.selectedDevicesStorage.length; i++) {
+                let listItem = document.getElementById(`${result.selectedDevicesStorage[i]}`);
+                let listItemSpan = $(listItem).find('span');
+
+                // Add cssClassForSelectedDevice class if it's not present
+                if (!listItemSpan.hasClass(cssClassForSelectedDevice)) {
+                    listItemSpan.addClass(cssClassForSelectedDevice);
+                }
+                // $(deviceListItem).find('span').addClass(cssClassForSelectedDevice);
+            }
+        }
     })
 };
 
@@ -147,8 +178,11 @@ let setupDeviceList = function () {
         }
     });
 
-    // Rebuild device list
+    // Rebuild device list on pop up open action
     rebuildDeviceList();
+
+    // Highlight selected devices on pop up open action
+    highlightSelectedDevices();
 };
 
 export {setupDeviceList}
