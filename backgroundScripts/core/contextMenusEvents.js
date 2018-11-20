@@ -14,14 +14,20 @@ import RequestHandler from "./requestHandler.js";
 let combineStrings = (id, text, version) => {
     if (id.includes('comment')) {
         return `${text}` +
-            `${customComments.commentDevicesStart}${customComments.devices}${customComments.commentEndLine}` +
-            `${customComments.commentEnvironmentURLStart}${environment.defaultEnvironmentURL} | \n` +
-            `${customComments.commentVersionStart}${version}${customComments.commentVersionEnd}`;
+            `${customComments.comments.devicesStart}${customComments.devices}${customComments.comments.endLine}` +
+            `${customComments.comments.environmentURLStart}${environment.defaultEnvironmentURL} | \n` +
+            `${customComments.comments.versionStart}${version}${customComments.comments.endLine}`;
     } else {
-        return `*STR:*\n# Open ${environment.defaultEnvironmentURL}\n${text}${environment.defaultEnvironmentURL}\n${version}`;
+        return `*STR:*\n# Open ${environment.defaultEnvironmentURL}\n` +
+            `${text}` +
+            `${customComments.devices}\n` +
+            `\n${customComments.description.environmentUrlStart}` +
+            `${environment.defaultEnvironmentURL}\n` +
+            `${version}`;
     }
 };
-// // To be moved outside this file
+
+// To be moved outside this file
 // let combineStrings = (id, text, version) => {
 //     if (id.includes('comment')) {
 //         return `${text}${environment.defaultEnvironmentURL} | \n${customComments.commentVersionStart}${version}${customComments.commentVersionEnd}`;
@@ -37,7 +43,7 @@ let combineStrings = (id, text, version) => {
  * @param menuId
  * @param text
  */
-let addOnClickHandler = ({ id, text }) => {
+let addOnClickHandler = ({id, text}) => {
     chrome.contextMenus.onClicked.addListener((menuItem) => {
         if (menuItem.menuItemId !== id) {
             return;

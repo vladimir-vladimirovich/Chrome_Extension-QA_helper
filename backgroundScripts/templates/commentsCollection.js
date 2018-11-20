@@ -30,8 +30,6 @@ export let commentsCollection = {
             '\n' +
             '*ER:* \n' +
             '\n' +
-            '*Found on:*\n' +
-            '\n' +
-            '*Environment details:* \n'
+            '*Found on:*\n'
         }
     };

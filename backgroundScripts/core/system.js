@@ -37,7 +37,9 @@ let formatDevicesArrayToString = function(devicesArray) {
  */
 let checkDefaultDevicesList = () => {
     chrome.storage.local.get(['selectedDevicesStorage'], function (result) {
-        if(!result.selectedDevicesStorage !== undefined) {
+        console.log('***** result.selectedDevicesStorage');
+        console.log(result.selectedDevicesStorage);
+        if(result.selectedDevicesStorage !== undefined) {
             customComments.devices = formatDevicesArrayToString(result.selectedDevicesStorage);
         }
     })
