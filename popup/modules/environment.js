@@ -67,7 +67,7 @@ let setupDropdown = function (selector, storage, defaultStorage) {
 /**
  * Setup click events for clean storage buttons
  */
-let setupEvents = function () {
+let setupEnvironmentEvents = function () {
     $(deleteSelectedEnvButton).click(function () {
         let currentEnvGroup = getCheckedRadioValue(environmentGroupRadio);
         removeSelectorValue(environmentSelector, currentEnvGroup)
@@ -92,7 +92,7 @@ let setupEvents = function () {
 };
 
 /**
- * 1. Selected value in dropdown will set as default
+ * 1. Selected value in drop down will set as default
  * 2. Change radio button that will be selected by default after pop up open
  * @param element
  * @param defaultStorage
@@ -109,7 +109,7 @@ let setupDropdownChangeEvent = function (element, defaultStorage, message) {
 };
 
 /**
- * Updates environment dropdown during radio[TST, STG, PROD] change accordingly
+ * Updates environment drop down during radio[TST, STG, PROD] change accordingly
  * @param {element} radioGroup
  */
 let setupRadioButtonChange = (radioGroup) => {
@@ -120,7 +120,7 @@ let setupRadioButtonChange = (radioGroup) => {
 
 /**
  * Update storage with value from input field
- * @param dropdownElement - dropdown to be updated right after adding new item
+ * @param dropdownElement - drop down to be updated right after adding new item
  * @param storage
  */
 let updateStorageWithValue = (dropdownElement, storage) => {
@@ -188,8 +188,7 @@ let getCheckedRadioValue = function (element) {
     return $(element).parent('.active')[0].children[0].value;
 };
 
-export {initializeEnvironmentGroup, setupEvents}
-
+export {initializeEnvironmentGroup, setupEnvironmentEvents}
 
 // let environmentSelector = document.getElementById('environmentSelector');
 // environmentSelector.options[environmentSelector.selectedIndex]

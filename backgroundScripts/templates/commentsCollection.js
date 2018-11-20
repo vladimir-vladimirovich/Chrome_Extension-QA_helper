@@ -6,26 +6,20 @@ export let commentsCollection = {
         passed:  {
             id: "commentPassed",
             text: '{panel:title=PT QA Test Results|borderColor=#828282|titleBGColor=#7EC45C|bgColor=#E1FADE}\n' +
-            '| *Test status:* | Passed (/) |\n' +
-            '| *Test scope\\Notes:* |  |\n' +
-            '| *Device\\OS\\Browser:* |  |\n' +
-            '| *Env URL:* | '
+            '| *Test status:* | Pass (/) |\n' +
+            '| *Test scope\\Notes:* |  |\n'
         },
         failed: {
             id: "commentFailed",
             text: '{panel:title=PT QA Test Results|borderColor=#828282|titleBGColor=#ff7f7f|bgColor=#FFF4F0}\n' +
-            '| *Test status:* | Failed (x) |\n' +
-            '| *Test scope\\Notes:* |  |\n' +
-            '| *Device\\OS\\Browser:* |  |\n' +
-            '| *Env URL:* | '
+            '| *Test status:* | Fail (x) |\n' +
+            '| *Test scope\\Notes:* |  |\n'
         },
         midState: {
             id: "commentMidState",
             text: '{panel:title=PT QA Test Results|borderColor=#828282|titleBGColor=#f4d942|bgColor=#E1FADE}\n' +
             '| *Test status:* | Test is partly OK |\n' +
-            '| *Test scope\\Notes:* |  |\n' +
-            '| *Device\\OS\\Browser:* |  |\n' +
-            `| *Env URL:* | `
+            '| *Test scope\\Notes:* |  |\n'
         },
         description: {
             id: "description",
@@ -36,8 +30,6 @@ export let commentsCollection = {
             '\n' +
             '*ER:* \n' +
             '\n' +
-            '*Found on:*\n' +
-            '\n' +
-            '*Environment details:* \n'
+            '*Found on:*\n'
         }
     };
