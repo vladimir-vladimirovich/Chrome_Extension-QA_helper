@@ -16,7 +16,8 @@ let combineStrings = (id, text, version) => {
         return `${text}` +
             `${customComments.comments.devicesStart}${customComments.devices}${customComments.comments.endLine}` +
             `${customComments.comments.environmentURLStart}${environment.defaultEnvironmentURL} | \n` +
-            `${customComments.comments.versionStart}${version}${customComments.comments.endLine}`;
+            `${customComments.comments.versionStart}${version}${customComments.comments.endLine}`+
+            `{panel}`;
     } else {
         return `*STR:*\n# Open ${environment.defaultEnvironmentURL}\n` +
             `${text}` +
@@ -26,15 +27,6 @@ let combineStrings = (id, text, version) => {
             `${version}`;
     }
 };
-
-// To be moved outside this file
-// let combineStrings = (id, text, version) => {
-//     if (id.includes('comment')) {
-//         return `${text}${environment.defaultEnvironmentURL} | \n${customComments.commentVersionStart}${version}${customComments.commentVersionEnd}`;
-//     } else {
-//         return `*STR:*\n# Open ${environment.defaultEnvironmentURL}\n${text}${environment.defaultEnvironmentURL}\n${version}`;
-//     }
-// };
 
 /**
  * 1. This method connects different menu items to text that will be pasted after click on them
