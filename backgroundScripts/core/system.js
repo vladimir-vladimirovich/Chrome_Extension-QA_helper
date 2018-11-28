@@ -55,16 +55,13 @@ export default {
             if (request.URLChange) {
                 environment.defaultEnvironmentURL = request.URLChange;
             }
-
             if (request.versionPathChange) {
                 environment.defaultFEJSONPass = request.versionPathChange;
             }
-
             if (request.deviceListChange) {
                 // Update template
                 customComments.devices = formatDevicesArrayToString(request.deviceListChange);
             }
-
             contextMenus.updateCurrentEnvironment();
         });
 

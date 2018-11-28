@@ -16,17 +16,8 @@ let cssClassForSelectedDevice = 'list-group-item-success';
 let addDeviceToPool = (newDeviceString) => {
     let deviceList = [];
     chrome.storage.local.get([deviceListStorage], function (result) {
-
-        // ---
-        console.log(">>> result.deviceListStorage below");
-        console.log(result.deviceListStorage);
-        // ---
-
         if (result.deviceListStorage !== undefined) {
             deviceList = result.deviceListStorage;
-            // ---
-            console.log(">>> result.deviceListStorage IF BLOCK - TRUE");
-            // ---
         }
 
         // Add new string at the beginning of the array
@@ -41,14 +32,7 @@ let addDeviceToPool = (newDeviceString) => {
  * Recreate DOM list of saved devices
  */
 let rebuildDeviceList = () => {
-    // ---
-    console.log("=== reBuilding device list...");
-    // ---
     chrome.storage.local.get([deviceListStorage], function (result) {
-        // ---
-        console.log("=== .rebuildDeviceList - result.deviceListStorage: ");
-        console.log(result.deviceListStorage);
-        // ---
 
         buildDeviceList(result.deviceListStorage);
     })
@@ -60,11 +44,8 @@ let rebuildDeviceList = () => {
  * @param {Array} deviceList
  */
 let buildDeviceList = function (deviceList) {
-    let deviceListJQobject = $('#deviceList');
-    deviceListJQobject.html('');
-    // ---
-    console.log("=== Building device list...");
-    // ---
+    let deviceListJQObject = $('#deviceList');
+    deviceListJQObject.html('');
 
     if (deviceList !== undefined) {
         for (let i = 0; i < deviceList.length; i++) {
@@ -75,7 +56,7 @@ let buildDeviceList = function (deviceList) {
                 '</div>';
 
             // Add new line
-            deviceListJQobject.append(deviceListItem);
+            deviceListJQObject.append(deviceListItem);
             // Add correct text to display
             let listItem = document.getElementById(`${deviceList[i]}`);
             let listItemSpan = $(listItem).find('span');
@@ -90,8 +71,6 @@ let buildDeviceList = function (deviceList) {
                     listItemSpan.addClass(cssClassForSelectedDevice);
                     addSelectedDeviceIdToStorage(deviceList[i]);
                 }
-
-
             });
 
             // Add event for '-' remove button. Removes device from list and UI update
@@ -99,8 +78,6 @@ let buildDeviceList = function (deviceList) {
                 listItem.remove();
                 chrome.storage.local.get([deviceListStorage], function (result) {
                     let updatedArray = result.deviceListStorage.filter(filterArray => filterArray !== deviceList[i]);
-                    // console.log("*** updatedArray: ");
-                    // console.log(updatedArray);
                     chrome.storage.local.set({[deviceListStorage]: updatedArray});
                     removeDeselectedDeviceIdFromStorage(deviceList[i]);
                 })
@@ -191,11 +168,3 @@ let setupDeviceList = function () {
 };
 
 export {setupDeviceList}
-
-// chrome.storage.local.remove('deviceListStorage')
-
-// chrome.storage.local.get(['selectedDevicesStorage'], function(result) {
-//     console.log(result.selectedDevicesStorage);
-// });
-
-// chrome.storage.local.remove(['selectedDevicesStorage'])
