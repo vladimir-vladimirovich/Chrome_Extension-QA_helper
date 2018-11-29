@@ -1,14 +1,28 @@
-// let scanButton = document.getElementById('scanDOM');
 let scanButton = $('#scanDOM');
 let scanResultsArea = $('#scanResultsArea');
 let scanOptions = $('#scanOptions');
 
 /**
- * Add new item to scan results area
- * @param item
+ * Add new field to scanResultsArea
  */
-let addNewItem = (item) => {
-    scanResultsArea.append(item);
+let addEntryField = (name, value) => {
+    let entryField = $('<div class="item-container">' +
+        `                <label for="addDeviceInput">${name}</label>` +
+        '                <div class="btn-group my-1">' +
+        `                    <input type="text" class="form-control col-7" placeholder="test" value='${value}'>` +
+        '                    <select class="custom-select col-3" aria-label="Example select with button addon">' +
+        '                        <option value="Only empty">None</option>' +
+        '                        <option value="Only filled">Username randomized</option>' +
+        '                        <option value="Only input">Email randomized</option>' +
+        '                    </select>' +
+        '                    <button class="btn btn-outline-danger col-2">-</button>' +
+        '                </div>' +
+        '            </div>')[0];
+
+    $(entryField).find('.btn').click(function (e) {
+        $(e.currentTarget).closest('.item-container').remove();
+    });
+    scanResultsArea.append(entryField);
 };
 
 // Setup
@@ -24,21 +38,17 @@ let setupFormFiller = function () {
         });
     });
 
+    // Listen for messages from content scripts. Waiting for array of objects with
     chrome.runtime.onMessage.addListener(function (request) {
         if (request.resultDOM) {
-            console.log("+++++++ request.resultDOM.resultArray +++++++");
-            console.log(request);
             for (let i = 0; i < request.resultDOM.length; i++) {
-                // Check if selector, checkbox or input field was found
+                // Check if selector, checkbox or entry field was found
                 if (request.resultDOM[i].tagName === 'SELECT') {
-                    console.log("Selector found");
-                    console.log(request.resultDOM[i].name);
+                    // TDB
                 } else if (request.resultDOM[i].type !== 'checkbox') {
-                    console.log('Entry field found');
-                    console.log(request.resultDOM[i].name);
+                    addEntryField(request.resultDOM[i].name, request.resultDOM[i].value);
                 } else {
-                    console.log('Checkbox field found');
-                    console.log(request.resultDOM[i].name);
+                    // TBD
                 }
             }
         }
