@@ -61,10 +61,9 @@ let getUniqueSelector = function (element, childElementSelector) {
 };
 
 /**
- * Listener which waits for context menu items to be clicked
+ * Convert found DOM elements to objects and send them
+ * @param resultArray
  */
-chrome.runtime.onMessage.addListener((request) => request.onClick && insertText(request.onClick));
-
 let sendFoundDOMElements = (resultArray) => {
     // Convert HTML object to regular object with required parameters
     resultArray = resultArray.map(element => {
@@ -80,11 +79,14 @@ let sendFoundDOMElements = (resultArray) => {
     chrome.runtime.sendMessage({resultDOM: resultArray})
 };
 
-chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-    console.log('++++++++++++++++++++++++++++++++++++++++++++++');
+/**
+ * Listen for request from pop up to scan the page
+ */
+chrome.runtime.onMessage.addListener(function (request) {
     if (request.scanDOM) {
         // Scan for all the page <input> tags
         let pageInputsObject = document.getElementsByTagName('input');
+        let pageSelectsObject = document.getElementsByTagName('select');
 
         // Formatting pageInputsObject to pageInputsArray
         let pageInputsArray = [];
@@ -92,15 +94,19 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
             pageInputsArray[i] = pageInputsObject[i];
         }
 
-        // Debug
-        console.log('++++++++++ pageInputsArray before filter ++++++++++');
-        console.log(pageInputsArray);
+        // Formatting pageSelectsObject to pageSelectsArray
+        let pageSelectsArray = [];
+        for (let i = 0; i < pageSelectsObject.length; i++) {
+            pageSelectsArray[i] = pageSelectsObject[i];
+        }
 
         // Check what is in request and do related functions
         if (request.scanDOM === 'scanAll') {
-            // Remove odd empty results
+            // Remove odd result w/o name tag
             pageInputsArray = pageInputsArray.filter(arr => arr.name !== "");
-            sendFoundDOMElements(pageInputsArray);
+
+            let pageAllElements = pageInputsArray.concat(pageSelectsArray);
+            sendFoundDOMElements(pageAllElements);
         } else if (request.scanDOM === 'scanInputs') {
             // Remove odd checkbox results
             pageInputsArray = pageInputsArray.filter(arr => arr.type !== 'checkbox').filter(arr => arr.name !== "");
@@ -109,6 +115,20 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
             // Leave only checkbox results
             pageInputsArray = pageInputsArray.filter(arr => arr.type === 'checkbox');
             sendFoundDOMElements(pageInputsArray);
+        } else if (request.scanDOM === 'scanFilled') {
+            // Search only for not empty fields
+            pageInputsArray = pageInputsArray.filter(arr => arr.value !== "");
+            pageSelectsArray = pageSelectsArray.filter(arr => arr.value !== "");
+
+            let pageAllElements = pageInputsArray.concat(pageSelectsArray);
+            sendFoundDOMElements(pageAllElements);
+        } else if (request.scanDOM === 'scanSelectors') {
+            sendFoundDOMElements(pageSelectsArray);
         }
     }
 });
+
+/**
+ * Listener which waits for context menu items to be clicked
+ */
+chrome.runtime.onMessage.addListener((request) => request.onClick && insertText(request.onClick));

@@ -125,34 +125,50 @@
         <!--Form filler tab-->
 
         <div class="container tab-pane fade" id="formFillerPage" role="tabpanel">
-            <div class="input-group mb-3">
+            <div class="input-group mb-3 mt-2">
                 <div class="input-group-prepend">
-                    <button class="btn btn-outline-secondary" type="button" id="scanDOM">Scan page</button>
+                    <button class="btn btn-success" type="button" id="scanDOM">Scan page</button>
                 </div>
                 <select class="custom-select" id="scanOptions">
-                    <option value="scanAll">All</option>
-                    <option value="scanEmpty">Only empty</option>
-                    <option value="scanFilled">Only filled</option>
-                    <option value="scanInputs">Only entry fields</option>
-                    <option value="scanCheckboxes">Only checkboxes</option>
-                    <option value="scanSelectors">Only selectors</option>
+                    <option value="scanAll">All (Ctrl+Alt+A)</option>
+                    <option value="scanFilled">Only filled (Ctrl+AltF)</option>
+                    <option value="scanInputs">Only entry fields (Ctrl+Alt+E)</option>
+                    <option value="scanCheckboxes">Only checkboxes (Ctrl+Alt+C)</option>
+                    <option value="scanSelectors">Only selectors (Ctrl+Alt+S)</option>
                 </select>
+            </div>
+
+            <div class="item-container">
+                <label for="formTemplateSelector" class="mt-2">Form templates</label>
+                <div class="input-group w-100">
+                    <select class="custom-select" id="formTemplateSelector">
+
+                    </select>
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-danger" type="button" id="deleteSelectedFormTemplate">-</button>
+                        <button class="btn btn-outline-secondary mdi mdi-arrow-down-drop-circle mdi-12px" type="button"
+                                data-toggle="collapse"
+                                data-target="#addFormTemplateArea">
+                        </button>
+                    </div>
+                </div>
+
+                <div class="input-group mt-2 collapse" id="addFormTemplateArea">
+                    <input type="text" class="form-control" placeholder="https://..."
+                           aria-label="Recipient's username"
+                           aria-describedby="basic-addon2">
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-success" type="button" id="addFormTemplateButton">+</button>
+                    </div>
+                </div>
             </div>
 
             <hr class="mt-4">
 
-            <div class="list-group mt-2 mb-3" id="scanResultsArea">
-                <!--<label for="addDeviceInput">#label</label>-->
-                <!--<div class="btn-group my-1">-->
-                <!--<input type="text" class="form-control col-7" placeholder="test">-->
-                <!--<select class="custom-select col-3" aria-label="Example select with button addon">-->
-                <!--<option value="Only empty">None</option>-->
-                <!--<option value="Only filled">Username randomized</option>-->
-                <!--<option value="Only input">Email randomized</option>-->
-                <!--</select>-->
-                <!--<button class="btn btn-outline-danger col-2">-</button>-->
-                <!--</div>-->
-            </div>
+            <form id="scanResultsArea">
+
+            </form>
+
         </div>
 
         <!--Custom comment tab-->
