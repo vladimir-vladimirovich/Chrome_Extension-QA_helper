@@ -11,6 +11,9 @@ let addFormTemplateButton = $('#addFormTemplateButton');
 let deleteFormTemplateButton = $('#deleteFormTemplateButton');
 let formTemplateSelector = $('#formTemplateSelector');
 
+// Global variable. Is used to keep actual displayed list
+let itemContainer = [];
+
 /**
  * Setup remove event on '.btn' remove click
  * @param element
@@ -23,15 +26,27 @@ let setupRemoveEvent = (element, templateName, indexInTemplate) => {
         // Remove item from DOM
         $(e.currentTarget).closest('.item-container').remove();
 
-        // 1. Get template from storage
-        // 2. Remove current item from template
-        // 3. Save new template w/o removed item
-        chrome.storage.local.get(templateName, function (result) {
-            if (result[templateName]) {
-                result[templateName].splice(indexInTemplate, 1);
-                chrome.storage.local.set({[templateName]: result[templateName]});
-            }
-        })
+        // // 1. Get template from storage
+        // // 2. Remove current item from template
+        // // 3. Save new template w/o removed item
+        // chrome.storage.local.get(templateName, function (result) {
+        //     if (result[templateName]) {
+        //         // result[templateName].splice(indexInTemplate, 1);
+        //         chrome.storage.local.set({[templateName]: result[templateName]});
+        //     }
+        // });
+
+        itemContainer.splice(indexInTemplate, 1);
+        chrome.storage.local.set({[templateName]: itemContainer});
+
+        rebuildItemsList(itemContainer, templateName);
+
+        console.log('*** indexInTemplate ***');
+        console.log(indexInTemplate);
+
+        console.log('*** itemContainer after splice ***');
+        console.log(itemContainer);
+
     });
     // Add this element to scanResultsArea
     scanResultsArea.append(element);
@@ -89,9 +104,23 @@ let addCheckboxField = (name, value, templateName, indexInTemplate) => {
 };
 
 /**
+ * Wrapper for buildItemsList function
+ * @param items
+ * @param templateName - name of storage. Required to build correct references for 'item removal' functionality
+ */
+let rebuildItemsList = (items, templateName) => {
+    $(scanResultsArea).empty();
+    buildItemsList(items, templateName);
+};
+
+/**
  * Build list of found elements on page
+ * @param items
+ * @param templateName - name of storage. Required to build correct references for 'item removal' functionality
  */
 let buildItemsList = (items, templateName) => {
+    console.log('=== items ===');
+    console.log(items);
     for (let i = 0; i < items.length; i++) {
         // Check if selector, checkbox or entry field was found and create related DOM element
         if (items[i].tagName === 'SELECT') {
@@ -112,24 +141,17 @@ let setupButtonClickEvents = () => {
     // Sends request to contentScripts with chosen selector value
     $(scanButton).click(function () {
         let actionItem = scanOptions[0].value;
-
         // Clear item list if activeTemplateStorage doesn't point to scanResultsStorage
         chrome.storage.local.get([activeTemplateStorage], function (result) {
             if (result[activeTemplateStorage] !== scanResultsStorage) {
                 $(scanResultsArea).empty();
                 chrome.storage.local.set({[activeTemplateStorage]: scanResultsStorage});
             }
-
             // Send message to currently active tab to trigger check
             chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
                 chrome.tabs.sendMessage(tabs[0].id, {scanDOM: actionItem});
             });
-
         });
-    });
-
-    $(addFormTemplateButton).click(function () {
-        
     });
 };
 
@@ -138,28 +160,24 @@ let setupButtonClickEvents = () => {
  */
 let setupFormFiller = function () {
     setupButtonClickEvents();
-
     // Listen for messages from content scripts
     // Build items list based on response
     chrome.runtime.onMessage.addListener(function (message) {
-        let itemList = [];
         // Get current scanResultsStorage list
         chrome.storage.local.get([scanResultsStorage], function (result) {
-            itemList = result.scanResultsStorage.concat(message.resultDOM);
-
             // Concatenate what is displayed and what was found
-            chrome.storage.local.set({[scanResultsStorage]: itemList});
-
-            buildItemsList(message.resultDOM, scanResultsStorage);
+            itemContainer = result.scanResultsStorage.concat(message.resultDOM);
+            chrome.storage.local.set({[scanResultsStorage]: itemContainer});
+            buildItemsList(itemContainer, scanResultsStorage);
         });
     });
-
     // Build items list of scanned elements on pop up open
     chrome.storage.local.get([scanResultsStorage], function (result) {
         if (result.scanResultsStorage) {
             // Clear results area before adding new elements
             $(scanResultsArea).empty();
-            buildItemsList(result.scanResultsStorage, scanResultsStorage);
+            itemContainer = result.scanResultsStorage;
+            buildItemsList(itemContainer, scanResultsStorage);
         }
     })
 };
