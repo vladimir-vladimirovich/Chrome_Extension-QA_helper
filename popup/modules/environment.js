@@ -189,7 +189,3 @@ let getCheckedRadioValue = function (element) {
 };
 
 export {initializeEnvironmentGroup, setupEnvironmentEvents}
-
-// let environmentSelector = document.getElementById('environmentSelector');
-// environmentSelector.options[environmentSelector.selectedIndex]
-// let optionsArray = Object.values(environmentSelector);
