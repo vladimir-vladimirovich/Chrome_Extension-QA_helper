@@ -14,7 +14,7 @@ let addFormTemplateButton = $('#addFormTemplateButton');
 let deleteFormTemplateButton = $('#deleteFormTemplateButton');
 let formTemplateSelector = $('#formTemplateSelector');
 
-// Global variable. Is used to keep actual displayed list
+// Is used to keep actual displayed list
 let itemContainer = [];
 
 /**
@@ -30,9 +30,12 @@ let setupRemoveEvent = (element, templateName, indexInTemplate) => {
         $(e.currentTarget).closest('.item-container').remove();
         // Remove item from array
         itemContainer.splice(indexInTemplate, 1);
-        chrome.storage.local.set({[templateName]: itemContainer});
+        chrome.storage.local.get(templatesStorage, function (result) {
+            result.templatesStorage[templateName] = itemContainer;
+            chrome.storage.local.set({[templatesStorage]: result.templatesStorage});
+        });
         // Rebuild item list
-        rebuildItemsList(itemContainer, templateName);
+        rebuildItemsList(templateName, itemContainer);
     });
     // Add this element to scanResultsArea
     scanResultsArea.append(element);
@@ -94,7 +97,7 @@ let addCheckboxField = (name, value, templateName, indexInTemplate) => {
  * @param items
  * @param templateName - name of storage. Required to build correct references for 'item removal' functionality
  */
-let buildItemsList = (items, templateName) => {
+let buildItemsList = (templateName, items) => {
     for (let i = 0; i < items.length; i++) {
         // Check if selector, checkbox or entry field was found and create related DOM element
         if (items[i].tagName === 'SELECT') {
@@ -112,27 +115,54 @@ let buildItemsList = (items, templateName) => {
  * @param items
  * @param templateName - name of storage. Required to build correct references for 'item removal' functionality
  */
-let rebuildItemsList = (items, templateName) => {
+let rebuildItemsList = (templateName, items) => {
+    // Clean existing DOM
     $(scanResultsArea).empty();
-    buildItemsList(items, templateName);
+
+    if (items === undefined) {
+        // Pull items from storage automatically if 'items' aren't defined
+        chrome.storage.local.get([templatesStorage], function (result) {
+            items = result.templatesStorage[templateName];
+            buildItemsList(templateName, items);
+        });
+    } else buildItemsList(templateName, items);
 };
 
 /**
  * Build template selector based on what was set
  */
 let buildTemplateSelector = () => {
-    chrome.storage.local.get(templatesStorage, function (result) {
-        if (result.templatesStorage === undefined) {
-            let emptyOption = document.createElement('option');
-            emptyOption.text = 'Nothing to display';
-            formTemplateSelector.append(emptyOption);
+    chrome.storage.local.get(templatesStorage, function (resultTemplates) {
+        if (resultTemplates.templatesStorage === undefined) {
+            let placeholderOption = $('<option></option>');
+            $(placeholderOption)
+                .attr('selected', true)
+                .attr('disabled', true)
+                .text('Not chosen');
+            formTemplateSelector.prepend(placeholderOption);
         } else {
-            $.each(result.templatesStorage, function (index, value) {
+            $.each(resultTemplates.templatesStorage, function (index, value) {
                 let option = document.createElement('option');
                 option.text = index;
                 $(formTemplateSelector).append(option);
             })
         }
+        // Choose option in selector
+        chrome.storage.local.get(activeTemplateStorage, function (resultActive) {
+            // if chosen template exists - choose it
+            if (resultTemplates.templatesStorage[resultActive.activeTemplateStorage]) {
+                $(formTemplateSelector).val(resultActive.activeTemplateStorage);
+            } else {
+                // If selected template was removed before the new one was chosen
+                // add option with text 'Not chosen'
+                let placeholderOption = $('<option></option>');
+                $(placeholderOption)
+                    .attr('selected', true)
+                    .attr('disabled', true)
+                    .text('Not chosen');
+                formTemplateSelector.prepend(placeholderOption);
+            }
+        });
     })
 };
 
@@ -196,6 +226,7 @@ let setupButtonClickEvents = () => {
     });
     // Event handler for '-' remove button
     $(deleteFormTemplateButton).click(function () {
+        // Get currently selected value from dropdown
         let selectedValue = $(formTemplateSelector).val();
         if (selectedValue !== null || selectedValue !== undefined) {
             chrome.storage.local.get([templatesStorage], function (result) {
@@ -204,8 +235,22 @@ let setupButtonClickEvents = () => {
                 chrome.storage.local.set({[templatesStorage]: result.templatesStorage});
                 // Update selector from storage
                 rebuildTemplateSelector();
+                // Clear the list in order to not to confuse users
+                $(scanResultsArea).empty();
             });
         }
+    });
+};
+
+/**
+ * Setup events for module selectors
+ */
+let setupSelectorChangeEvent = () => {
+    $(formTemplateSelector).change(function (eventObject) {
+        console.log('CHANGED eventObject.target.value: ' + eventObject.target.value);
+        // Update storage cell responsible for keeping currently selected template
+        chrome.storage.local.set({[activeTemplateStorage]: eventObject.target.value});
+        rebuildItemsList(eventObject.target.value)
     });
 };
 
@@ -215,28 +260,55 @@ let setupButtonClickEvents = () => {
 let setupFormFillerModule = function () {
     // Setup click events for all buttons in module
     setupButtonClickEvents();
+    // Setup change event for templates selector
+    setupSelectorChangeEvent();
     // Listen for messages from content scripts
     // Build items list based on response
     chrome.runtime.onMessage.addListener(function (message) {
         // Get current scanResultsStorage list
-        chrome.storage.local.get([scanResultsStorage], function (result) {
-            // Concatenate what is displayed and what was found
-            itemContainer = result.scanResultsStorage.concat(message.resultDOM);
-            chrome.storage.local.set({[scanResultsStorage]: itemContainer});
-            rebuildItemsList(itemContainer, scanResultsStorage);
+        chrome.storage.local.get(templatesStorage, function (result) {
+            if (result.templatesStorage[scanResultsStorage]) {
+                // IF scanResultsStorage ALREADY EXISTS - update it
+                // Update module variable responsible for displayed list
+                itemContainer = result.templatesStorage[scanResultsStorage].concat(message.resultDOM);
+                result.templatesStorage[scanResultsStorage] = itemContainer;
+                // Save updated value to storage
+                chrome.storage.local.set({[templatesStorage]: result.templatesStorage});
+                // Update UI
+                rebuildItemsList(scanResultsStorage, itemContainer);
+                rebuildTemplateSelector();
+            } else {
+                //IF NOT EXISTS YET - create new value in templatesStorage
+                result.templatesStorage[scanResultsStorage] = message.resultDOM;
+                // Update module variable responsible for displayed list
+                itemContainer = result.templatesStorage[scanResultsStorage];
+                // Save updated value to storage
+                chrome.storage.local.set({[templatesStorage]: result.templatesStorage});
+                // Update UI
+                rebuildItemsList(scanResultsStorage, itemContainer);
+                rebuildTemplateSelector();
+            }
         });
     });
     // Build items list of scanned elements on pop up open
-    chrome.storage.local.get([scanResultsStorage], function (result) {
-        if (result.scanResultsStorage) {
+    // Choose correct value in selector
+    chrome.storage.local.get([activeTemplateStorage], function (resultActive) {
+        if (resultActive.activeTemplateStorage) {
+            // Fill selector with templates names
+            buildTemplateSelector();
             // Clear results area before adding new elements
             $(scanResultsArea).empty();
-            itemContainer = result.scanResultsStorage;
-            buildItemsList(itemContainer, scanResultsStorage);
+            chrome.storage.local.get([templatesStorage], function (resultTemplates) {
+                // ERROR here
+                // sometimes resultActive.activeTemplateStorage = 'scanResultsStorage'
+                // AND resultTemplates.templatesStorage[resultActive.activeTemplateStorage] - doesn't exists
+                // expected
+                itemContainer = resultTemplates.templatesStorage[resultActive.activeTemplateStorage];
+                buildItemsList(scanResultsStorage, itemContainer);
+            });
         }
     });
-    // Fill selector with templates names
-    buildTemplateSelector();
+
 };
 
 export {setupFormFillerModule}
