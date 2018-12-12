@@ -43,8 +43,6 @@ let initializeEnvironmentGroup = function () {
  */
 let setupDropdown = function (selector, storage, defaultStorage) {
     chrome.storage.local.get([storage], function (result) {
-        console.log('[-_-] Adding items to URL list...');
-        console.log(result);
         selector.options.length = 0;
         if (result[storage] === undefined) {
             let emptyOption = document.createElement('option');

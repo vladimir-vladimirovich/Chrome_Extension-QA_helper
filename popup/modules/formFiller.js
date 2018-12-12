@@ -9,6 +9,7 @@ let activeTemplateStorage = 'activeTemplateStorage';
 // Used to keep templates
 let templatesStorage = 'templatesStorage';
 
+let addFormTemplateInput = $('#addFormTemplateInput');
 let addFormTemplateButton = $('#addFormTemplateButton');
 let deleteFormTemplateButton = $('#deleteFormTemplateButton');
 let formTemplateSelector = $('#formTemplateSelector');
@@ -89,17 +90,6 @@ let addCheckboxField = (name, value, templateName, indexInTemplate) => {
 };
 
 /**
- * Wrapper for buildItemsList function
- * @param items
- * @param templateName - name of storage. Required to build correct references for 'item removal' functionality
- */
-let rebuildItemsList = (items, templateName) => {
-    console.log('---rebuild---');
-    $(scanResultsArea).empty();
-    buildItemsList(items, templateName);
-};
-
-/**
  * Build list of found elements on page
  * @param items
  * @param templateName - name of storage. Required to build correct references for 'item removal' functionality
@@ -118,7 +108,67 @@ let buildItemsList = (items, templateName) => {
 };
 
 /**
- * Setup button click events
+ * Wrapper for buildItemsList function
+ * @param items
+ * @param templateName - name of storage. Required to build correct references for 'item removal' functionality
+ */
+let rebuildItemsList = (items, templateName) => {
+    $(scanResultsArea).empty();
+    buildItemsList(items, templateName);
+};
+
+/**
+ * Build template selector based on what was set
+ */
+let buildTemplateSelector = () => {
+    chrome.storage.local.get(templatesStorage, function (result) {
+        if (result.templatesStorage === undefined) {
+            let emptyOption = document.createElement('option');
+            emptyOption.text = 'Nothing to display';
+            formTemplateSelector.append(emptyOption);
+        } else {
+            $.each(result.templatesStorage, function (index, value) {
+                let option = document.createElement('option');
+                option.text = index;
+                $(formTemplateSelector).append(option);
+            })
+        }
+    })
+};
+
+/**
+ * Rebuild template selector based on what was set
+ */
+let rebuildTemplateSelector = () => {
+    $(formTemplateSelector).empty();
+    buildTemplateSelector();
+};
+
+/**
+ * Add template to storage / update selector with new value
+ * @param {String} templateName
+ */
+let addTemplate = (templateName) => {
+    chrome.storage.local.get([templatesStorage], function (result) {
+        // Check if templatesStorage is already defined
+        if (result.templatesStorage) {
+            // Update templatesStorage with new item
+            result.templatesStorage[templateName] = itemContainer;
+            chrome.storage.local.set({[templatesStorage]: result.templatesStorage});
+            // Update selector with added value
+            rebuildTemplateSelector();
+        } else {
+            // If templateContainer isn't defined yet - create it AND put new template inside
+            let templateContainer = {};
+            templateContainer[templateName] = itemContainer;
+            chrome.storage.local.set({[templatesStorage]: templateContainer});
+            rebuildTemplateSelector();
+        }
+    })
+};
+
+/**
+ * Setup button click events for all buttons in module
  */
 let setupButtonClickEvents = () => {
     // Event handler for click on 'Scan page' button
@@ -137,29 +187,33 @@ let setupButtonClickEvents = () => {
             });
         });
     });
+    // Event handler for '+' add button
+    $(addFormTemplateButton).click(function () {
+        // RegExp to be used here!
+        if ($(addFormTemplateInput)[0].value && $(addFormTemplateInput)[0].value !== "" && $(addFormTemplateInput)[0].value !== " ") {
+            addTemplate($(addFormTemplateInput)[0].value);
+        }
+    });
+    // Event handler for '-' remove button
+    $(deleteFormTemplateButton).click(function () {
+        let selectedValue = $(formTemplateSelector).val();
+        if (selectedValue !== null || selectedValue !== undefined) {
+            chrome.storage.local.get([templatesStorage], function (result) {
+                // Delete selected template from storage
+                delete result.templatesStorage[selectedValue];
+                chrome.storage.local.set({[templatesStorage]: result.templatesStorage});
+                // Update selector from storage
+                rebuildTemplateSelector();
+            });
+        }
+    });
 };
-//
-// /**
-//  * Add template to storage / update selector with new value
-//  * @param {String} templateName
-//  */
-// let addTemplate = (templateName) => {
-//     chrome.storage.local.get([templatesStorage], function (result) {
-//         if(result) {
-//
-//         } else {
-//             // TBD
-//             let templateContainer = {};
-//             templateContainer.templateName = itemContainer;
-//             chrome.storage.local.set({[templatesStorage]: templateContainer});
-//         }
-//     })
-// };
 
 /**
  * Setup module
  */
-let setupFormFiller = function () {
+let setupFormFillerModule = function () {
+    // Setup click events for all buttons in module
     setupButtonClickEvents();
     // Listen for messages from content scripts
     // Build items list based on response
@@ -180,7 +234,9 @@ let setupFormFiller = function () {
             itemContainer = result.scanResultsStorage;
             buildItemsList(itemContainer, scanResultsStorage);
         }
-    })
+    });
+    // Fill selector with templates names
+    buildTemplateSelector();
 };
 
-export {setupFormFiller}
+export {setupFormFillerModule}
