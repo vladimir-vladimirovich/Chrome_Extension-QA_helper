@@ -129,17 +129,24 @@ let rebuildItemsList = (templateName, items) => {
 };
 
 /**
+ * Show placeholder in select tag
+ */
+let showPlaceHolderOption = () => {
+    let placeholderOption = $('<option></option>');
+    $(placeholderOption)
+        .attr('selected', true)
+        .attr('disabled', true)
+        .text('Not chosen');
+    formTemplateSelector.prepend(placeholderOption);
+};
+
+/**
  * Build template selector based on what was set
  */
 let buildTemplateSelector = () => {
     chrome.storage.local.get(templatesStorage, function (resultTemplates) {
         if (resultTemplates.templatesStorage === undefined) {
-            let placeholderOption = $('<option></option>');
-            $(placeholderOption)
-                .attr('selected', true)
-                .attr('disabled', true)
-                .text('Not chosen');
-            formTemplateSelector.prepend(placeholderOption);
+            showPlaceHolderOption();
         } else {
             $.each(resultTemplates.templatesStorage, function (index, value) {
                 let option = document.createElement('option');
@@ -155,12 +162,7 @@ let buildTemplateSelector = () => {
             } else {
                 // If selected template was removed before the new one was chosen
                 // add option with text 'Not chosen'
-                let placeholderOption = $('<option></option>');
-                $(placeholderOption)
-                    .attr('selected', true)
-                    .attr('disabled', true)
-                    .text('Not chosen');
-                formTemplateSelector.prepend(placeholderOption);
+                showPlaceHolderOption();
             }
         });
     })
@@ -265,30 +267,34 @@ let setupFormFillerModule = function () {
     // Listen for messages from content scripts
     // Build items list based on response
     chrome.runtime.onMessage.addListener(function (message) {
-        // Get current scanResultsStorage list
-        chrome.storage.local.get(templatesStorage, function (result) {
-            if (result.templatesStorage[scanResultsStorage]) {
-                // IF scanResultsStorage ALREADY EXISTS - update it
-                // Update module variable responsible for displayed list
-                itemContainer = result.templatesStorage[scanResultsStorage].concat(message.resultDOM);
-                result.templatesStorage[scanResultsStorage] = itemContainer;
-                // Save updated value to storage
-                chrome.storage.local.set({[templatesStorage]: result.templatesStorage});
-                // Update UI
-                rebuildItemsList(scanResultsStorage, itemContainer);
-                rebuildTemplateSelector();
-            } else {
-                //IF NOT EXISTS YET - create new value in templatesStorage
-                result.templatesStorage[scanResultsStorage] = message.resultDOM;
-                // Update module variable responsible for displayed list
-                itemContainer = result.templatesStorage[scanResultsStorage];
-                // Save updated value to storage
-                chrome.storage.local.set({[templatesStorage]: result.templatesStorage});
-                // Update UI
-                rebuildItemsList(scanResultsStorage, itemContainer);
-                rebuildTemplateSelector();
-            }
-        });
+        if (message.resultDOM) {
+            console.log('resultDOM');
+            console.log(message.resultDOM);
+            // Get current scanResultsStorage list
+            chrome.storage.local.get(templatesStorage, function (result) {
+                if (result.templatesStorage[scanResultsStorage]) {
+                    // IF scanResultsStorage ALREADY EXISTS - update it
+                    // Update module variable responsible for displayed list
+                    itemContainer = result.templatesStorage[scanResultsStorage].concat(message.resultDOM);
+                    result.templatesStorage[scanResultsStorage] = itemContainer;
+                    // Save updated value to storage
+                    chrome.storage.local.set({[templatesStorage]: result.templatesStorage});
+                    // Update UI
+                    rebuildItemsList(scanResultsStorage, itemContainer);
+                    rebuildTemplateSelector();
+                } else {
+                    //IF NOT EXISTS YET - create new value in templatesStorage
+                    result.templatesStorage[scanResultsStorage] = message.resultDOM;
+                    // Update module variable responsible for displayed list
+                    itemContainer = result.templatesStorage[scanResultsStorage];
+                    // Save updated value to storage
+                    chrome.storage.local.set({[templatesStorage]: result.templatesStorage});
+                    // Update UI
+                    rebuildItemsList(scanResultsStorage, itemContainer);
+                    rebuildTemplateSelector();
+                }
+            });
+        }
     });
     // Build items list of scanned elements on pop up open
     // Choose correct value in selector
@@ -308,7 +314,6 @@ let setupFormFillerModule = function () {
             });
         }
     });
-
 };
 
 export {setupFormFillerModule}

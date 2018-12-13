@@ -87,24 +87,20 @@ chrome.runtime.onMessage.addListener(function (request) {
         // Scan for all the page <input> tags
         let pageInputsObject = document.getElementsByTagName('input');
         let pageSelectsObject = document.getElementsByTagName('select');
-
         // Formatting pageInputsObject to pageInputsArray
         let pageInputsArray = [];
         for (let i = 0; i < pageInputsObject.length; i++) {
             pageInputsArray[i] = pageInputsObject[i];
         }
-
         // Formatting pageSelectsObject to pageSelectsArray
         let pageSelectsArray = [];
         for (let i = 0; i < pageSelectsObject.length; i++) {
             pageSelectsArray[i] = pageSelectsObject[i];
         }
-
         // Check what is in request and do related functions
         if (request.scanDOM === 'scanAll') {
             // Remove odd result w/o name tag
             pageInputsArray = pageInputsArray.filter(arr => arr.name !== "");
-
             let pageAllElements = pageInputsArray.concat(pageSelectsArray);
             sendFoundDOMElements(pageAllElements);
         } else if (request.scanDOM === 'scanInputs') {
@@ -119,7 +115,6 @@ chrome.runtime.onMessage.addListener(function (request) {
             // Search only for not empty fields
             pageInputsArray = pageInputsArray.filter(arr => arr.value !== "");
             pageSelectsArray = pageSelectsArray.filter(arr => arr.value !== "");
-
             let pageAllElements = pageInputsArray.concat(pageSelectsArray);
             sendFoundDOMElements(pageAllElements);
         } else if (request.scanDOM === 'scanSelectors') {
@@ -127,6 +122,36 @@ chrome.runtime.onMessage.addListener(function (request) {
         }
     }
 });
+
+/**
+ * Fill page elements with data
+ */
+let fillPageElements = (elementsArray) => {
+    elementsArray.map((e) => {
+        console.log('e');
+        console.log(e);
+        console.log('e.cssSelector');
+        console.log(document.querySelector(e.cssSelector));
+    })
+};
+
+// Handles response from background scripts
+// Waits for array of elements to be filled
+chrome.runtime.onMessage.addListener((request) => {
+    if (request.setActiveTemplate) {
+        console.log(request.setActiveTemplate);
+        console.log('FILL THE PAGE');
+        fillPageElements(request.setActiveTemplate)
+    }
+});
+
+// Hot keys handler
+document.onkeyup = (e) => {
+    // Ctrl + Alt + V shortcut combination was pressed
+    if (e.ctrlKey && e.altKey && e.which === 86) {
+        chrome.runtime.sendMessage({getActiveTemplate: 'getActiveTemplate'});
+    }
+};
 
 /**
  * Listener which waits for context menu items to be clicked
