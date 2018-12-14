@@ -131,7 +131,7 @@ let fillPageElements = (elementsArray) => {
         console.log('e');
         console.log(e);
         console.log('e.cssSelector');
-        console.log(document.querySelector(e.cssSelector));
+        console.log(e.cssSelector);
     })
 };
 
