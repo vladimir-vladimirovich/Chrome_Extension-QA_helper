@@ -7,60 +7,6 @@ let insertText = (text) => {
 };
 
 /**
- * Convert classList object to CSS selector of classes
- * @param {DOMTokenList} obj
- * @return {string} - CSS Selector
- */
-let returnClassesSelector = function (obj) {
-    let resultArray = [];
-    let resultString = '';
-    // Convert DOMTokenList to Array
-    for (let i = 0; i < obj.length; i++) {
-        resultArray[i] = obj[i];
-    }
-    // Convert array of classes to CSS selector string
-    resultArray.map(function (arrayItem) {
-        resultString = resultString + '.' + arrayItem
-    });
-    return resultString;
-};
-
-/**
- * Form CSS selector for element.
- * Use class list + name attribute if exists
- * @param element - DOM element
- * @return {*}
- */
-let formCSSSector = function (element) {
-    // Check if element exists
-    if (element) {
-        // Check if element.name exists
-        if (element.name) {
-            return returnClassesSelector(element.classList) + '[name="' + element.name + '"]';
-        } else return returnClassesSelector(element.classList);
-    } else return 'Element is missing'
-};
-
-/**
- * Get unique CSS selector build from attributes: class and name(if exists)
- * @param {Element} element
- * @param {String} childElementSelector
- * @return {*}
- */
-let getUniqueSelector = function (element, childElementSelector) {
-    // Combine CSS selector of element and his children's
-    let jointSelector = formCSSSector(element) + ' ' + childElementSelector;
-    if (document.querySelectorAll(jointSelector)[1]) {
-        if (element.parentElement) {
-            // Recursion function
-            return getUniqueSelector(element.parentElement, jointSelector);
-        } else return "Not able to find unique CSS selector";
-    } else {
-        return jointSelector;
-    }
-};
-
-/**
  * Convert found DOM elements to objects and send them
  * @param resultArray
  */
@@ -72,7 +18,7 @@ let sendFoundDOMElements = (resultArray) => {
             tagName: element.tagName,
             name: element.name,
             value: element.value,
-            cssSelector: getUniqueSelector(element, '')
+            cssSelector: QAASelector.buildUniqueCSSSelector(element)
         }
     });
     // Send new array to pop up
@@ -128,30 +74,124 @@ chrome.runtime.onMessage.addListener(function (request) {
  */
 let fillPageElements = (elementsArray) => {
     elementsArray.map((e) => {
-        console.log('e');
-        console.log(e);
-        console.log('e.cssSelector');
-        console.log(e.cssSelector);
+        // console.log(e.cssSelector);
+        if (e.cssSelector) {
+            console.log("selector: " + e.cssSelector);
+            console.log("value: " + e.value);
+            console.log(document.querySelector(e.cssSelector));
+            document.querySelector(e.cssSelector).value = e.value;
+        }
     })
 };
 
+// WIP
 // Handles response from background scripts
 // Waits for array of elements to be filled
 chrome.runtime.onMessage.addListener((request) => {
     if (request.setActiveTemplate) {
         console.log(request.setActiveTemplate);
-        console.log('FILL THE PAGE');
         fillPageElements(request.setActiveTemplate)
     }
 });
 
-// Hot keys handler
-document.onkeyup = (e) => {
-    // Ctrl + Alt + V shortcut combination was pressed
-    if (e.ctrlKey && e.altKey && e.which === 86) {
-        chrome.runtime.sendMessage({getActiveTemplate: 'getActiveTemplate'});
+// Class to handle all 'search for unique CSS selector' operations
+class QAASelector {
+    /**
+     * Returns array of all parent nodes. Parent of parent and etc.
+     * @param element
+     * @returns {Array}
+     */
+    static getParentNodes(element) {
+        let parentsTree = [];
+        while (element) {
+            parentsTree.push(element);
+            element = element.parentNode;
+        }
+        return parentsTree;
+    };
+
+    /**
+     * Check if HTML element has unique class
+     * @param element
+     * @returns {*}
+     */
+    static checkForUniqueClass(element) {
+        let result = null;
+        let i = 0;
+        while (element.classList[i]) {
+            if (!document.querySelectorAll(`.${element.classList[i]}`)[1]) {
+                result = element.classList[i];
+                break;
+            }
+            i++;
+        }
+        return result;
+    };
+
+    /**
+     * Search for unique class in array
+     * @param nodesTree
+     * @returns {*}
+     */
+    static checkForUniqueParentClass(nodesTree) {
+        let result = null;
+        let i = 0;
+        while (nodesTree[i]) {
+            if (QAASelector.checkForUniqueClass(nodesTree[i])) {
+                result = "." + QAASelector.checkForUniqueClass(nodesTree[i]);
+                break;
+            }
+            i++;
+        }
+        return result;
+    };
+
+    /**
+     * Simply check if selector point to unique element
+     * @param selector
+     * @returns {boolean}
+     */
+    static checkIfUnique(selector) {
+        if (!document.querySelectorAll(selector)[1]) {
+            return true;
+        } else return false;
+    };
+
+    /**
+     * Find unique css selector for element
+     * @param element
+     * @returns {string}
+     */
+    static buildUniqueCSSSelector(element) {
+        // 	Check if element has id
+        //  so any other checks may be redundant
+        if (element.id) {
+            return "[id='" + element.id + "']";
+        }
+        // 	Check if name attribute is present
+        //  it will be added to all class sequences
+        let name = "";
+        if (element.name) {
+            name = "[name='" + element.name + "']";
+            if (QAASelector.checkIfUnique(name)) {
+                return name;
+            }
+        }
+        // Search for unique class in parent nodes
+        // Concatenate parent unique class with element.name
+        let nodesTree = QAASelector.getParentNodes(element);
+        if (QAASelector.checkForUniqueParentClass(nodesTree)) {
+            if (QAASelector.checkIfUnique(QAASelector.checkForUniqueParentClass(nodesTree) + " " + name)) {
+                return QAASelector.checkForUniqueParentClass(nodesTree) + " " + name;
+            }
+        }
+        // 	Check if element has unique class
+        //  so any other checks may be redundant
+        if (QAASelector.checkForUniqueClass(element)) {
+            return "." + QAASelector.checkForUniqueClass(element);
+        }
     }
-};
+}
 
 /**
  * Listener which waits for context menu items to be clicked
