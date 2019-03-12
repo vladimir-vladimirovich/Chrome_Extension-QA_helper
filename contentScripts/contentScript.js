@@ -18,7 +18,9 @@ let sendFoundDOMElements = (resultArray) => {
             tagName: element.tagName,
             name: element.name,
             value: element.value,
-            cssSelector: QAASelector.buildUniqueCSSSelector(element)
+            cssSelectorOne: QAAPageElement.buildUniqueCSSSelectorTypeOne(element),
+            cssSelectorTwo: QAAPageElement.buildUniqueCSSSelectorTypeTwo(element),
+            cssSelectorThree: QAAPageElement.buildUniqueCSSSelectorTypeThree(element)
         }
     });
     // Send new array to pop up
@@ -69,33 +71,37 @@ chrome.runtime.onMessage.addListener(function (request) {
     }
 });
 
-/**
- * Fill page elements with data
- */
-let fillPageElements = (elementsArray) => {
-    elementsArray.map((e) => {
-        // console.log(e.cssSelector);
-        if (e.cssSelector) {
-            console.log("selector: " + e.cssSelector);
-            console.log("value: " + e.value);
-            console.log(document.querySelector(e.cssSelector));
-            document.querySelector(e.cssSelector).value = e.value;
-        }
-    })
-};
-
 // WIP
 // Handles response from background scripts
 // Waits for array of elements to be filled
 chrome.runtime.onMessage.addListener((request) => {
     if (request.setActiveTemplate) {
-        console.log(request.setActiveTemplate);
-        fillPageElements(request.setActiveTemplate)
+        // console.log(request.setActiveTemplate);
+        QAAPageElement.fillPageElements(request.setActiveTemplate);
     }
 });
 
 // Class to handle all 'search for unique CSS selector' operations
-class QAASelector {
+class QAAPageElement {
+    /**
+     * Fill page elements with data
+     */
+    static fillPageElements = (elementsArray) => {
+        elementsArray.map((element) => {
+            // Fill element ONLY IF selector exists and page element by this selector exists
+            if (element.cssSelectorOne && document.querySelector(element.cssSelectorOne)) {
+                document.querySelector(element.cssSelectorOne).value = element.value;
+                QAAPageElement.triggerChangeEvent(element.cssSelectorOne);
+            } else if (element.cssSelectorTwo && document.querySelector(element.cssSelectorTwo)) {
+                document.querySelector(element.cssSelectorTwo).value = element.value;
+                QAAPageElement.triggerChangeEvent(element.cssSelectorTwo);
+            } else if (element.cssSelectorThree && document.querySelector(element.cssSelectorThree)) {
+                document.querySelector(element.cssSelectorThree).value = element.value;
+                QAAPageElement.triggerChangeEvent(element.cssSelectorThree);
+            }
+        })
+    };
+
     /**
      * Returns array of all parent nodes. Parent of parent and etc.
      * @param element
@@ -115,35 +121,86 @@ class QAASelector {
      * @param element
      * @returns {*}
      */
-    static checkForUniqueClass(element) {
-        let result = null;
+    static getUniqueClass(element) {
+        let resultUniqueClass = null;
         let i = 0;
         while (element.classList[i]) {
             if (!document.querySelectorAll(`.${element.classList[i]}`)[1]) {
-                result = element.classList[i];
+                resultUniqueClass = element.classList[i];
                 break;
             }
             i++;
         }
-        return result;
+        return resultUniqueClass;
     };
 
     /**
-     * Search for unique class in array
+     * Search for unique combination: (non-unique parent class + non-unique element's name) = unique selector
      * @param nodesTree
-     * @returns {*}
+     * @param selector
      */
-    static checkForUniqueParentClass(nodesTree) {
-        let result = null;
+    static getParentClassPlusElementSelector(nodesTree, selector) {
+        let resultUniqueSelector = null;
+        // Flag to stop the cycle
+        let status = false;
         let i = 0;
         while (nodesTree[i]) {
-            if (QAASelector.checkForUniqueClass(nodesTree[i])) {
-                result = "." + QAASelector.checkForUniqueClass(nodesTree[i]);
+            let j = 0;
+            // Do checks for elements with class attribute only
+            if (nodesTree[i].classList) {
+                while (nodesTree[i].classList[j]) {
+                    // Ignore validation classes because they are too dynamic
+                    if (nodesTree[i].classList[j] !== "valid" && nodesTree[i].classList[j] !== "invalid") {
+                        if (QAAPageElement.checkIfUnique(`.${nodesTree[i].classList[j]} ${selector}`)) {
+                            resultUniqueSelector = `.${nodesTree[i].classList[j]} ${selector}`;
+                            status = true;
+                            break;
+                        }
+                    }
+                    j++;
+                }
+            }
+            if (status) {
                 break;
             }
             i++;
         }
-        return result;
+        return resultUniqueSelector;
+    };
+
+    /**
+     * Search for unique combination: (parent attribute + non-unique element's name) = unique selector
+     * @param nodesTree
+     * @param selector
+     * @return {*}
+     */
+    static getParentAttributePlusElementSelector(nodesTree, selector) {
+        let resultUniqueSelector = null;
+        // Flag to stop the cycle
+        let status = false;
+        let m = 0;
+        while (nodesTree[m]) {
+            let n = 0;
+            if (nodesTree[m].attributes) {
+                while (nodesTree[m].attributes[n]) {
+                    if (nodesTree[m].attributes[n].nodeName !== "class" && nodesTree[m].attributes[n].nodeName !== "style") {
+                        if (QAAPageElement.checkIfUnique(
+                            `[${nodesTree[m].attributes[n].nodeName}="${nodesTree[m].attributes[n].value}"] ${selector}`)
+                        ) {
+                            resultUniqueSelector = `[${nodesTree[m].attributes[n].nodeName}="${nodesTree[m].attributes[n].value}"] ${selector}`;
+                            status = true;
+                            break;
+                        }
+                    }
+                    n++;
+                }
+            }
+            if (status) {
+                break;
+            }
+            m++;
+        }
+        return resultUniqueSelector;
     };
 
     /**
@@ -152,44 +209,102 @@ class QAASelector {
      * @returns {boolean}
      */
     static checkIfUnique(selector) {
-        if (!document.querySelectorAll(selector)[1]) {
-            return true;
-        } else return false;
+        if (document.querySelector(selector)) {
+            return !document.querySelectorAll(selector)[1];
+        }
+    };
+
+    /**
+     * Scan for all element's attributes and combine them to CSS selector
+     * Class attribute removed from combination
+     * @param element
+     */
+    static buildAttributesSelector(element) {
+        let resultSelector = "";
+        let i = 0;
+        while (element.attributes[i]) {
+            if (element.attributes[i].nodeName !== "class") {
+                resultSelector = resultSelector + "[" + element.attributes[i].nodeName + "='" + element.attributes[i].value + "']";
+            }
+            i++;
+        }
+        return resultSelector;
     };
 
     /**
      * Find unique css selector for element
+     * See possible result below in priority order
+     * 1: unique ID
+     * 2: unique name
+     * 3: (parent class + non unique name) = unique selector
+     * 4: unique class
      * @param element
-     * @returns {string}
+     * @returns {string || null}
      */
-    static buildUniqueCSSSelector(element) {
-        // 	Check if element has id
-        //  so any other checks may be redundant
+    static buildUniqueCSSSelectorTypeOne(element) {
+        // 1
+        // Check if element has id
+        // so any other checks may be redundant
         if (element.id) {
             return "[id='" + element.id + "']";
         }
-        // 	Check if name attribute is present
-        //  it will be added to all class sequences
+        // 2
+        // Check if name attribute is present
+        // it will be added to all class sequences
         let name = "";
         if (element.name) {
             name = "[name='" + element.name + "']";
-            if (QAASelector.checkIfUnique(name)) {
+            if (QAAPageElement.checkIfUnique(name)) {
                 return name;
             }
         }
-        // Search for unique class in parent nodes
-        // Concatenate parent unique class with element.name
-        let nodesTree = QAASelector.getParentNodes(element);
-        if (QAASelector.checkForUniqueParentClass(nodesTree)) {
-            if (QAASelector.checkIfUnique(QAASelector.checkForUniqueParentClass(nodesTree) + " " + name)) {
-                return QAASelector.checkForUniqueParentClass(nodesTree) + " " + name;
+        // 3
+        if (name !== "") {
+            let nodesTree = QAAPageElement.getParentNodes(element);
+            if (QAAPageElement.getParentClassPlusElementSelector(nodesTree, name)) {
+                return QAAPageElement.getParentClassPlusElementSelector(nodesTree, name);
             }
         }
+        // 4
         // 	Check if element has unique class
-        //  so any other checks may be redundant
-        if (QAASelector.checkForUniqueClass(element)) {
-            return "." + QAASelector.checkForUniqueClass(element);
+        if (QAAPageElement.getUniqueClass(element)) {
+            return "." + QAAPageElement.getUniqueClass(element);
         }
+
+        return null;
+    };
+
+    /**
+     * Build CSS selector based on element attributes except class
+     * @param element
+     */
+    static buildUniqueCSSSelectorTypeTwo(element) {
+        let attributesSelector = QAAPageElement.buildAttributesSelector(element);
+        if (QAAPageElement.checkIfUnique(attributesSelector)) {
+            return attributesSelector;
+        } else return null;
+    };
+
+    /**
+     * Search for unique combination: (parent attribute + non-unique element's name) = unique selector
+     * @param element
+     * @return {*}
+     */
+    static buildUniqueCSSSelectorTypeThree(element) {
+        if (element.name) {
+            let parentTree = QAAPageElement.getParentNodes(element);
+            return QAAPageElement.getParentAttributePlusElementSelector(parentTree, `[name='${element.name}']`);
+        } else return null;
+    };
+
+    /**
+     * Trigger dispatchEvent for element
+     * @param selector
+     */
+    static triggerChangeEvent(selector) {
+        let event = document.createEvent('Event');
+        event.initEvent('change', true, true);
+        document.querySelector(selector).dispatchEvent(event);
     }
 }
 
