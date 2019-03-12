@@ -1,105 +1,119 @@
 /**
- * Insert text to HTML element which is in focus at the moment
- * @param {String} text
+ * Class to describe all content-backgroundScripts communication
  */
-let insertText = (text) => {
-    document.activeElement.value = text
-};
+class QAABackgroundScriptsCommunication {
+    /**
+     * Listener which waits for context menu items to be clicked
+     */
+    static listenForContextMenuClick() {
+        chrome.runtime.onMessage.addListener((request) => request.onClick && QAAPageElement.insertText(request.onClick));
+    }
+}
 
 /**
- * Convert found DOM elements to objects and send them
- * @param resultArray
+ * Class to describe all content-popup communications
  */
-let sendFoundDOMElements = (resultArray) => {
-    // Convert HTML object to regular object with required parameters
-    resultArray = resultArray.map(element => {
-        return {
-            type: element.type,
-            tagName: element.tagName,
-            name: element.name,
-            value: element.value,
-            cssSelectorOne: QAAPageElement.buildUniqueCSSSelectorTypeOne(element),
-            cssSelectorTwo: QAAPageElement.buildUniqueCSSSelectorTypeTwo(element),
-            cssSelectorThree: QAAPageElement.buildUniqueCSSSelectorTypeThree(element)
-        }
-    });
-    // Send new array to pop up
-    chrome.runtime.sendMessage({resultDOM: resultArray})
-};
+class QAAPopupCommunication {
+    /**
+     * Convert found DOM elements to objects and send them
+     * @param resultArray
+     */
+    static sendFoundDOMElements(resultArray) {
+        resultArray = resultArray.map(element => {
+            return {
+                type: element.type,
+                tagName: element.tagName,
+                name: element.name,
+                value: element.value,
+                cssSelectors: QAAPageElement.getUniqueSelectors(element)
+            }
+        });
+        // Send new array to pop up
+        chrome.runtime.sendMessage({resultDOM: resultArray})
+    };
 
-/**
- * Listen for request from pop up to scan the page
- */
-chrome.runtime.onMessage.addListener(function (request) {
-    if (request.scanDOM) {
-        // Scan for all the page <input> tags
-        let pageInputsObject = document.getElementsByTagName('input');
-        let pageSelectsObject = document.getElementsByTagName('select');
-        // Formatting pageInputsObject to pageInputsArray
-        let pageInputsArray = [];
-        for (let i = 0; i < pageInputsObject.length; i++) {
-            pageInputsArray[i] = pageInputsObject[i];
-        }
-        // Formatting pageSelectsObject to pageSelectsArray
-        let pageSelectsArray = [];
-        for (let i = 0; i < pageSelectsObject.length; i++) {
-            pageSelectsArray[i] = pageSelectsObject[i];
-        }
-        // Check what is in request and do related functions
-        if (request.scanDOM === 'scanAll') {
-            // Remove odd result w/o name tag
-            pageInputsArray = pageInputsArray.filter(arr => arr.name !== "");
-            let pageAllElements = pageInputsArray.concat(pageSelectsArray);
-            sendFoundDOMElements(pageAllElements);
-        } else if (request.scanDOM === 'scanInputs') {
-            // Remove odd checkbox results
-            pageInputsArray = pageInputsArray.filter(arr => arr.type !== 'checkbox').filter(arr => arr.name !== "");
-            sendFoundDOMElements(pageInputsArray);
-        } else if (request.scanDOM === 'scanCheckboxes') {
-            // Leave only checkbox results
-            pageInputsArray = pageInputsArray.filter(arr => arr.type === 'checkbox');
-            sendFoundDOMElements(pageInputsArray);
-        } else if (request.scanDOM === 'scanFilled') {
-            // Search only for not empty fields
-            pageInputsArray = pageInputsArray.filter(arr => arr.value !== "");
-            pageSelectsArray = pageSelectsArray.filter(arr => arr.value !== "");
-            let pageAllElements = pageInputsArray.concat(pageSelectsArray);
-            sendFoundDOMElements(pageAllElements);
-        } else if (request.scanDOM === 'scanSelectors') {
-            sendFoundDOMElements(pageSelectsArray);
-        }
-    }
-});
+    /**
+     * Listen for request from pop up to scan the page
+     */
+    static listenForPageScan() {
+        chrome.runtime.onMessage.addListener(function (request) {
+            if (request.scanDOM) {
+                // Scan for all the page <input> tags
+                let pageInputsObject = document.getElementsByTagName('input');
+                let pageSelectsObject = document.getElementsByTagName('select');
+                // Formatting pageInputsObject to pageInputsArray
+                let pageInputsArray = [];
+                for (let i = 0; i < pageInputsObject.length; i++) {
+                    pageInputsArray[i] = pageInputsObject[i];
+                }
+                // Formatting pageSelectsObject to pageSelectsArray
+                let pageSelectsArray = [];
+                for (let i = 0; i < pageSelectsObject.length; i++) {
+                    pageSelectsArray[i] = pageSelectsObject[i];
+                }
+                // Check what is in request and do related functions
+                if (request.scanDOM === 'scanAll') {
+                    // Remove odd result w/o name tag
+                    pageInputsArray = pageInputsArray.filter(arr => arr.name !== "");
+                    let pageAllElements = pageInputsArray.concat(pageSelectsArray);
+                    QAAPopupCommunication.sendFoundDOMElements(pageAllElements);
+                } else if (request.scanDOM === 'scanInputs') {
+                    // Remove odd checkbox results
+                    pageInputsArray = pageInputsArray.filter(arr => arr.type !== 'checkbox').filter(arr => arr.name !== "");
+                    QAAPopupCommunication.sendFoundDOMElements(pageInputsArray);
+                } else if (request.scanDOM === 'scanCheckboxes') {
+                    // Leave only checkbox results
+                    pageInputsArray = pageInputsArray.filter(arr => arr.type === 'checkbox');
+                    QAAPopupCommunication.sendFoundDOMElements(pageInputsArray);
+                } else if (request.scanDOM === 'scanFilled') {
+                    // Search only for not empty fields
+                    pageInputsArray = pageInputsArray.filter(arr => arr.value !== "");
+                    pageSelectsArray = pageSelectsArray.filter(arr => arr.value !== "");
+                    let pageAllElements = pageInputsArray.concat(pageSelectsArray);
+                    QAAPopupCommunication.sendFoundDOMElements(pageAllElements);
+                } else if (request.scanDOM === 'scanSelectors') {
+                    QAAPopupCommunication.sendFoundDOMElements(pageSelectsArray);
+                }
+            }
+        });
+    };
 
-// WIP
-// Handles response from background scripts
-// Waits for array of elements to be filled
-chrome.runtime.onMessage.addListener((request) => {
-    if (request.setActiveTemplate) {
-        // console.log(request.setActiveTemplate);
-        QAAPageElement.fillPageElements(request.setActiveTemplate);
+    /**
+     * Handles response from background scripts
+     * Waits for array of elements to be filled
+     */
+    static listenForFillForm() {
+        chrome.runtime.onMessage.addListener((request) => {
+            if (request.setActiveTemplate) {
+                QAAPageElement.fillPageElements(request.setActiveTemplate);
+            }
+        });
     }
-});
+}
 
 // Class to handle all 'search for unique CSS selector' operations
 class QAAPageElement {
     /**
+     * Insert text to HTML element which is in focus at the moment
+     * @param {String} text
+     */
+    static insertText = (text) => {
+        document.activeElement.value = text
+    };
+
+    /**
      * Fill page elements with data
      */
     static fillPageElements = (elementsArray) => {
-        elementsArray.map((element) => {
-            // Fill element ONLY IF selector exists and page element by this selector exists
-            if (element.cssSelectorOne && document.querySelector(element.cssSelectorOne)) {
-                document.querySelector(element.cssSelectorOne).value = element.value;
-                QAAPageElement.triggerChangeEvent(element.cssSelectorOne);
-            } else if (element.cssSelectorTwo && document.querySelector(element.cssSelectorTwo)) {
-                document.querySelector(element.cssSelectorTwo).value = element.value;
-                QAAPageElement.triggerChangeEvent(element.cssSelectorTwo);
-            } else if (element.cssSelectorThree && document.querySelector(element.cssSelectorThree)) {
-                document.querySelector(element.cssSelectorThree).value = element.value;
-                QAAPageElement.triggerChangeEvent(element.cssSelectorThree);
+        elementsArray.forEach((element) => {
+            let validSelector = element.cssSelectors.find((cssSelector) => {
+                return document.querySelector(cssSelector);
+            });
+            if (validSelector) {
+                document.querySelector(validSelector).value = element.value;
+                QAAPageElement.triggerChangeEvent(validSelector);
             }
-        })
+        });
     };
 
     /**
@@ -232,6 +246,24 @@ class QAAPageElement {
     };
 
     /**
+     * Search for unique CSS selectors for element
+     * @param element
+     */
+    static getUniqueSelectors(element) {
+        let selectorsArray = [];
+        if (QAAPageElement.buildUniqueCSSSelectorTypeOne(element)) {
+            selectorsArray.push(QAAPageElement.buildUniqueCSSSelectorTypeOne(element))
+        }
+        if (QAAPageElement.buildUniqueCSSSelectorTypeTwo(element)) {
+            selectorsArray.push(QAAPageElement.buildUniqueCSSSelectorTypeTwo(element))
+        }
+        if (QAAPageElement.buildUniqueCSSSelectorTypeThree(element)) {
+            selectorsArray.push(QAAPageElement.buildUniqueCSSSelectorTypeThree(element))
+        }
+        return selectorsArray;
+    }
+
+    /**
      * Find unique css selector for element
      * See possible result below in priority order
      * 1: unique ID
@@ -243,14 +275,10 @@ class QAAPageElement {
      */
     static buildUniqueCSSSelectorTypeOne(element) {
         // 1
-        // Check if element has id
-        // so any other checks may be redundant
         if (element.id) {
             return "[id='" + element.id + "']";
         }
         // 2
-        // Check if name attribute is present
-        // it will be added to all class sequences
         let name = "";
         if (element.name) {
             name = "[name='" + element.name + "']";
@@ -266,11 +294,9 @@ class QAAPageElement {
             }
         }
         // 4
-        // 	Check if element has unique class
         if (QAAPageElement.getUniqueClass(element)) {
             return "." + QAAPageElement.getUniqueClass(element);
         }
-
         return null;
     };
 
@@ -302,13 +328,14 @@ class QAAPageElement {
      * @param selector
      */
     static triggerChangeEvent(selector) {
+        console.log("[-_-] event triggered for: " + selector);
         let event = document.createEvent('Event');
         event.initEvent('change', true, true);
         document.querySelector(selector).dispatchEvent(event);
     }
 }
 
-/**
- * Listener which waits for context menu items to be clicked
- */
-chrome.runtime.onMessage.addListener((request) => request.onClick && insertText(request.onClick));
+QAAPopupCommunication.listenForPageScan();
+QAAPopupCommunication.listenForFillForm();
+QAABackgroundScriptsCommunication.listenForContextMenuClick();
+
