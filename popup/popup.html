@@ -13,7 +13,8 @@
             </li>
 
             <li class="nav-item">
-                <a class="nav-link" id="formFillerTab" data-toggle="tab" href="#formFillerPage" role="tab">Form</a>
+                <a class="nav-link mdi mdi-eyedropper mdi-24px" id="formFillerTab" data-toggle="tab"
+                   href="#formFillerPage" role="tab"></a>
             </li>
 
             <!--<li class="nav-item">-->
@@ -117,8 +118,8 @@
                 </div>
 
                 <!--Device list-->
-
-                <div class="list-group mt-2 mb-3" id="deviceList"></div>
+                <label for="deviceList">Device list</label>
+                <div class="list-group mb-3" id="deviceList"></div>
             </div>
         </div>
 
@@ -163,6 +164,8 @@
                 </div>
             </div>
 
+            <button type="button" class="btn btn-success mt-1 w-100" id="pasteFormButton">Paste</button>
+
             <hr class="mt-4">
 
             <form id="scanResultsArea">
@@ -170,93 +173,6 @@
             </form>
 
         </div>
-
-        <!--Custom comment tab-->
-
-        <!--<div class="container tab-pane fade" id="customCommentPage" role="tablist">-->
-
-        <!--<ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">-->
-        <!--<li class="nav-item">-->
-        <!--<a class="nav-link active" id="passPill" data-toggle="pill" href="#commentArea" role="tab"-->
-        <!--aria-controls="pills-home" aria-selected="true">Pass</a>-->
-        <!--</li>-->
-        <!--<li class="nav-item">-->
-        <!--<a class="nav-link" id="failPill" data-toggle="pill" href="#commentArea" role="tab"-->
-        <!--aria-controls="pills-profile" aria-selected="false">Fail</a>-->
-        <!--</li>-->
-        <!--<li class="nav-item">-->
-        <!--<a class="nav-link" id="midStatePill" data-toggle="pill" href="#commentArea" role="tab"-->
-        <!--aria-controls="pills-contact" aria-selected="false">MidState</a>-->
-        <!--</li>-->
-        <!--<li class="nav-item">-->
-        <!--<a class="nav-link" id="descriptionPill" data-toggle="pill" href="#descriptionArea" role="tab"-->
-        <!--aria-controls="pills-contact" aria-selected="false">Description</a>-->
-        <!--</li>-->
-
-        <!--</ul>-->
-
-        <!--<hr>-->
-
-        <!--<div class="tab-content" id="commentTabContent">-->
-        <!--&lt;!&ndash;Comments area&ndash;&gt;-->
-
-        <!--<div class="tab-pane fade show active" id="commentArea" role="tabpanel">-->
-        <!--&lt;!&ndash;Test status&ndash;&gt;-->
-
-        <!--<label for="testStatus" class="mt-2">Test status</label>-->
-        <!--<div class="input-group" id="testStatus">-->
-        <!--<input type="text" class="form-control" placeholder="test status">-->
-        <!--<div class="input-group-append">-->
-        <!--<button class="btn btn-outline-success" type="button">apply</button>-->
-        <!--</div>-->
-        <!--</div>-->
-
-        <!--&lt;!&ndash;Test scope/Notes&ndash;&gt;-->
-
-        <!--<label for="testScope" class="mt-2">Test scope/notes</label>-->
-        <!--<div class="input-group" id="testScope">-->
-        <!--<textarea class="form-control" placeholder="test scope"></textarea>-->
-        <!--<div class="input-group-append">-->
-        <!--<button class="btn btn-outline-success" type="button">apply</button>-->
-        <!--</div>-->
-        <!--</div>-->
-        <!--</div>-->
-
-        <!--&lt;!&ndash;Description area&ndash;&gt;-->
-
-        <!--<div class="tab-pane fade" id="descriptionArea" role="tabpanel">-->
-        <!--&lt;!&ndash;Steps To Reproduce&ndash;&gt;-->
-
-        <!--<label for="STR" class="mt-2">Steps To Reproduce</label>-->
-        <!--<div class="input-group" id="STR">-->
-        <!--<textarea class="form-control" placeholder="steps to reproduce"></textarea>-->
-        <!--<div class="input-group-append">-->
-        <!--<button class="btn btn-outline-success" type="button">apply</button>-->
-        <!--</div>-->
-        <!--</div>-->
-
-        <!--&lt;!&ndash;Actual Result&ndash;&gt;-->
-
-        <!--<label for="AR" class="mt-2">Actual Result</label>-->
-        <!--<div class="input-group" id="AR">-->
-        <!--<textarea class="form-control" placeholder="actual result"></textarea>-->
-        <!--<div class="input-group-append">-->
-        <!--<button class="btn btn-outline-success" type="button">apply</button>-->
-        <!--</div>-->
-        <!--</div>-->
-
-        <!--&lt;!&ndash;Expected Result&ndash;&gt;-->
-
-        <!--<label for="AR" class="mt-2">Expceted Result</label>-->
-        <!--<div class="input-group" id="ER">-->
-        <!--<textarea class="form-control" placeholder="expected result"></textarea>-->
-        <!--<div class="input-group-append">-->
-        <!--<button class="btn btn-outline-success" type="button">apply</button>-->
-        <!--</div>-->
-        <!--</div>-->
-        <!--</div>-->
-        <!--</div>-->
-        <!--</div>-->
     </div>
 </div>
 

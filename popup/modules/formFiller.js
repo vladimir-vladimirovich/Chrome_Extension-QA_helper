@@ -1,6 +1,7 @@
 let scanButton = $('#scanDOM');
 let scanResultsArea = $('#scanResultsArea');
 let scanOptions = $('#scanOptions');
+let pasteFormButton = $('#pasteFormButton');
 
 // All scanned results will overwrite this variable
 let scanResultsStorage = 'scanResultsStorage';
@@ -242,6 +243,18 @@ let setupButtonClickEvents = () => {
             });
         }
     });
+    // Event handler for pasteFormButton
+    $(pasteFormButton).click(function () {
+        chrome.storage.local.get(templatesStorage, function(resultTemplate){
+            chrome.storage.local.get(activeTemplateStorage, function(resultActiveTemplate){
+                let activeTemplate = resultTemplate.templatesStorage[resultActiveTemplate.activeTemplateStorage];
+                console.log(activeTemplate);
+                chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
+                    chrome.tabs.sendMessage(tabs[0].id, {setActiveTemplate: activeTemplate});
+                });
+            })
+        })
+    })
 };
 
 /**

@@ -328,7 +328,6 @@ class QAAPageElement {
      * @param selector
      */
     static triggerChangeEvent(selector) {
-        console.log("[-_-] event triggered for: " + selector);
         let event = document.createEvent('Event');
         event.initEvent('change', true, true);
         document.querySelector(selector).dispatchEvent(event);
