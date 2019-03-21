@@ -67,7 +67,7 @@ let addEntryField = (name, value, templateName, indexInTemplate) => {
  * Add new field for <select> element found on page
  */
 let addSelectField = (name, value, templateName, indexInTemplate) => {
-    let selectField = $('<div class="item-container form-group">' +
+    let selectField = $('<div class="item-container currentForm-group">' +
         `                   <label for="addDeviceInput">${name} [Selector]</label>` +
         '                   <div class="btn-group my-1 w-100">' +
         `                       <input type="text" class="form-control col-10" value='${value}'>` +
@@ -82,7 +82,7 @@ let addSelectField = (name, value, templateName, indexInTemplate) => {
  * Add new field for <input>.type = 'checkbox'
  */
 let addCheckboxField = (name, value, templateName, indexInTemplate) => {
-    let selectField = $('<div class="item-container form-group">' +
+    let selectField = $('<div class="item-container currentForm-group">' +
         `                   <label for="addDeviceInput">${name} [Checkbox]</label>` +
         '                   <div class="btn-group my-1 w-100">' +
         `                       <input type="text" class="form-control col-10" value='${value}'>` +
@@ -158,7 +158,7 @@ let buildTemplateSelector = () => {
         // Choose option in selector
         chrome.storage.local.get(activeTemplateStorage, function (resultActive) {
             // if chosen template exists - choose it
-            if (resultTemplates.templatesStorage[resultActive.activeTemplateStorage]) {
+            if (resultTemplates.templatesStorage && resultTemplates.templatesStorage[resultActive.activeTemplateStorage]) {
                 $(formTemplateSelector).val(resultActive.activeTemplateStorage);
             } else {
                 // If selected template was removed before the new one was chosen
@@ -245,8 +245,8 @@ let setupButtonClickEvents = () => {
     });
     // Event handler for pasteFormButton
     $(pasteFormButton).click(function () {
-        chrome.storage.local.get(templatesStorage, function(resultTemplate){
-            chrome.storage.local.get(activeTemplateStorage, function(resultActiveTemplate){
+        chrome.storage.local.get(templatesStorage, function (resultTemplate) {
+            chrome.storage.local.get(activeTemplateStorage, function (resultActiveTemplate) {
                 let activeTemplate = resultTemplate.templatesStorage[resultActiveTemplate.activeTemplateStorage];
                 console.log(activeTemplate);
                 chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
@@ -269,10 +269,34 @@ let setupSelectorChangeEvent = () => {
     });
 };
 
+// let initializeDefaultStorageItems = () => {
+//     chrome.storage.local.get(scanResultsStorage, function (result) {
+//         if (!result) {
+//             console.log("scanResultsStorage has been created");
+//             chrome.storage.local.set({[scanResultsStorage]: ""})
+//         }
+//     });
+//
+//     chrome.storage.local.get(activeTemplateStorage, function (result) {
+//         if (!result) {
+//             console.log("scanResultsStorage has been created");
+//             chrome.storage.local.set({[activeTemplateStorage]: ""})
+//         }
+//     });
+//
+//     chrome.storage.local.get(templatesStorage, function (result) {
+//         if (!result) {
+//             console.log("scanResultsStorage has been created");
+//             chrome.storage.local.set({[templatesStorage]: ""})
+//         }
+//     })
+// };
+
 /**
  * Setup module
  */
 let setupFormFillerModule = function () {
+    // initializeDefaultStorageItems();
     // Setup click events for all buttons in module
     setupButtonClickEvents();
     // Setup change event for templates selector
@@ -285,26 +309,28 @@ let setupFormFillerModule = function () {
             console.log(message.resultDOM);
             // Get current scanResultsStorage list
             chrome.storage.local.get(templatesStorage, function (result) {
-                if (result.templatesStorage[scanResultsStorage]) {
-                    // IF scanResultsStorage ALREADY EXISTS - update it
-                    // Update module variable responsible for displayed list
-                    itemContainer = result.templatesStorage[scanResultsStorage].concat(message.resultDOM);
-                    result.templatesStorage[scanResultsStorage] = itemContainer;
-                    // Save updated value to storage
-                    chrome.storage.local.set({[templatesStorage]: result.templatesStorage});
-                    // Update UI
-                    rebuildItemsList(scanResultsStorage, itemContainer);
-                    rebuildTemplateSelector();
-                } else {
-                    //IF NOT EXISTS YET - create new value in templatesStorage
-                    result.templatesStorage[scanResultsStorage] = message.resultDOM;
-                    // Update module variable responsible for displayed list
-                    itemContainer = result.templatesStorage[scanResultsStorage];
-                    // Save updated value to storage
-                    chrome.storage.local.set({[templatesStorage]: result.templatesStorage});
-                    // Update UI
-                    rebuildItemsList(scanResultsStorage, itemContainer);
-                    rebuildTemplateSelector();
+                if (result && result.templatesStorage) {
+                    if (result.templatesStorage[scanResultsStorage]) {
+                        // IF scanResultsStorage ALREADY EXISTS - update it
+                        // Update module variable responsible for displayed list
+                        itemContainer = result.templatesStorage[scanResultsStorage].concat(message.resultDOM);
+                        result.templatesStorage[scanResultsStorage] = itemContainer;
+                        // Save updated value to storage
+                        chrome.storage.local.set({[templatesStorage]: result.templatesStorage});
+                        // Update UI
+                        rebuildItemsList(scanResultsStorage, itemContainer);
+                        rebuildTemplateSelector();
+                    } else {
+                        //IF NOT EXISTS YET - create new value in templatesStorage
+                        result.templatesStorage[scanResultsStorage] = message.resultDOM;
+                        // Update module variable responsible for displayed list
+                        itemContainer = result.templatesStorage[scanResultsStorage];
+                        // Save updated value to storage
+                        chrome.storage.local.set({[templatesStorage]: result.templatesStorage});
+                        // Update UI
+                        rebuildItemsList(scanResultsStorage, itemContainer);
+                        rebuildTemplateSelector();
+                    }
                 }
             });
         }
@@ -318,12 +344,12 @@ let setupFormFillerModule = function () {
             // Clear results area before adding new elements
             $(scanResultsArea).empty();
             chrome.storage.local.get([templatesStorage], function (resultTemplates) {
-                // ERROR here
-                // sometimes resultActive.activeTemplateStorage = 'scanResultsStorage'
-                // AND resultTemplates.templatesStorage[resultActive.activeTemplateStorage] - doesn't exists
-                // expected
-                itemContainer = resultTemplates.templatesStorage[resultActive.activeTemplateStorage];
-                buildItemsList(scanResultsStorage, itemContainer);
+                if (resultTemplates.templatesStorage) {
+                    itemContainer = resultTemplates.templatesStorage[resultActive.activeTemplateStorage];
+                    buildItemsList(scanResultsStorage, itemContainer);
+                }
+                // itemContainer = resultTemplates.templatesStorage[resultActive.activeTemplateStorage];
+                // buildItemsList(scanResultsStorage, itemContainer);
             });
         }
     });
