@@ -133,7 +133,7 @@ let updateStorageWithValue = (dropdownElement, storage) => {
         dropdown = versionPathSelector;
     }
 
-    let newItem = $(dropdownElement.target).parent().parent().find('.currentForm-control')[0].value;
+    let newItem = $(dropdownElement.target).parent().parent().find('.currentDOMForm-control')[0].value;
 
     chrome.storage.local.get([currentStorage], function (result) {
         if (result[currentStorage] && newItem !== "") {

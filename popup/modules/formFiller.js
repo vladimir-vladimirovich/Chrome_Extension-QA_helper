@@ -7,7 +7,7 @@ let pasteFormButton = $('#pasteFormButton');
 let scanResultsStorage = 'scanResultsStorage';
 // Used to keep link on currently active template
 let activeTemplateStorage = 'activeTemplateStorage';
-// Used to keep templates
+// Used to keep formTemplates
 let templatesStorage = 'templatesStorage';
 
 let addFormTemplateInput = $('#addFormTemplateInput');
@@ -67,7 +67,7 @@ let addEntryField = (name, value, templateName, indexInTemplate) => {
  * Add new field for <select> element found on page
  */
 let addSelectField = (name, value, templateName, indexInTemplate) => {
-    let selectField = $('<div class="item-container currentForm-group">' +
+    let selectField = $('<div class="item-container currentDOMForm-group">' +
         `                   <label for="addDeviceInput">${name} [Selector]</label>` +
         '                   <div class="btn-group my-1 w-100">' +
         `                       <input type="text" class="form-control col-10" value='${value}'>` +
@@ -82,7 +82,7 @@ let addSelectField = (name, value, templateName, indexInTemplate) => {
  * Add new field for <input>.type = 'checkbox'
  */
 let addCheckboxField = (name, value, templateName, indexInTemplate) => {
-    let selectField = $('<div class="item-container currentForm-group">' +
+    let selectField = $('<div class="item-container currentDOMForm-group">' +
         `                   <label for="addDeviceInput">${name} [Checkbox]</label>` +
         '                   <div class="btn-group my-1 w-100">' +
         `                       <input type="text" class="form-control col-10" value='${value}'>` +
@@ -299,7 +299,7 @@ let setupFormFillerModule = function () {
     // initializeDefaultStorageItems();
     // Setup click events for all buttons in module
     setupButtonClickEvents();
-    // Setup change event for templates selector
+    // Setup change event for formTemplates selector
     setupSelectorChangeEvent();
     // Listen for messages from content scripts
     // Build items list based on response
@@ -339,7 +339,7 @@ let setupFormFillerModule = function () {
     // Choose correct value in selector
     chrome.storage.local.get([activeTemplateStorage], function (resultActive) {
         if (resultActive.activeTemplateStorage) {
-            // Fill selector with templates names
+            // Fill selector with formTemplates names
             buildTemplateSelector();
             // Clear results area before adding new elements
             $(scanResultsArea).empty();

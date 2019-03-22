@@ -12,3 +12,6 @@ setupDeviceList();
 let formManager = new FormManager();
 formManager.setupScanButtonClickEvent();
 formManager.setupResultDOMListener();
+formManager.setDefaultPlaceholder();
+formManager.setupAddTemplateButtonClickEvent();
+formManager.setupTemplatesDropDown();

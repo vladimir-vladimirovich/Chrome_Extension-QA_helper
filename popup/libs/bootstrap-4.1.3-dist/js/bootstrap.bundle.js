@@ -3982,7 +3982,7 @@
     };
     var Selector = {
       DATA_TOGGLE: '[data-toggle="dropdown"]',
-      FORM_CHILD: '.dropdown currentForm',
+      FORM_CHILD: '.dropdown currentDOMForm',
       MENU: '.dropdown-menu',
       NAVBAR_NAV: '.navbar-nav',
       VISIBLE_ITEMS: '.dropdown-menu .dropdown-item:not(.disabled):not(:disabled)'

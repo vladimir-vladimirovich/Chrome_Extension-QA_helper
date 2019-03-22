@@ -3,11 +3,15 @@ let formManagerData = {
         scanButton: "[id='scanDOM']",
         pasteFormButton: "[id='pasteFormButton']",
         scanOptions: "[id='scanOptions']",
-        scanResultsArea: "[id='scanResultsArea']"
+        scanResultsArea: "[id='scanResultsArea']",
+        formTemplateSelector: "[id='formTemplateSelector']",
+        addFormTemplateInput: "[id='addFormTemplateInput']",
+        addFormTemplateButton: "[id='addFormTemplateButton']"
     },
     storage: {
         scanResults: "scanResults",
-        templates: "templates"
+        formTemplates: "formTemplates",
+        activeFormTemplate: "activeFormTemplate"
     }
 };
 
