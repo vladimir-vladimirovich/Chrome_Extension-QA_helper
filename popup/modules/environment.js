@@ -43,8 +43,6 @@ let initializeEnvironmentGroup = function () {
  */
 let setupDropdown = function (selector, storage, defaultStorage) {
     chrome.storage.local.get([storage], function (result) {
-        console.log('[-_-] Adding items to URL list...');
-        console.log(result);
         selector.options.length = 0;
         if (result[storage] === undefined) {
             let emptyOption = document.createElement('option');
@@ -135,7 +133,7 @@ let updateStorageWithValue = (dropdownElement, storage) => {
         dropdown = versionPathSelector;
     }
 
-    let newItem = $(dropdownElement.target).parent().parent().find('.form-control')[0].value;
+    let newItem = $(dropdownElement.target).parent().parent().find('.currentDOMForm-control')[0].value;
 
     chrome.storage.local.get([currentStorage], function (result) {
         if (result[currentStorage] && newItem !== "") {
@@ -189,7 +187,3 @@ let getCheckedRadioValue = function (element) {
 };
 
 export {initializeEnvironmentGroup, setupEnvironmentEvents}
-
-// let environmentSelector = document.getElementById('environmentSelector');
-// environmentSelector.options[environmentSelector.selectedIndex]
-// let optionsArray = Object.values(environmentSelector);

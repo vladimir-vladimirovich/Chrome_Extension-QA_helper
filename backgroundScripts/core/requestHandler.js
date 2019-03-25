@@ -24,6 +24,7 @@ export default {
 
                 // Delete unnecessary property: commit log
                 delete versionJSON.WPL_Git_Log;
+                delete versionJSON.commits;
 
                 // Stringify parsed json
                 let resultString = '';
