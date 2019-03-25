@@ -1,6 +1,6 @@
 import formManagerData from "../data/formManagerData.js";
 
-export default class FormManager {
+export default class FormManagerOld {
     constructor() {
         this.scanButton = document.querySelector(formManagerData.selectors.scanButton);
         this.scanOptions = document.querySelector(formManagerData.selectors.scanOptions);
