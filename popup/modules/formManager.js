@@ -8,6 +8,8 @@ export default class FormManagerNew {
         this.formTemplateSelector = document.querySelector(formManagerData.selectors.formTemplateSelector);
         this.addFormTemplateInput = document.querySelector(formManagerData.selectors.addFormTemplateInput);
         this.addFormTemplateButton = document.querySelector(formManagerData.selectors.addFormTemplateButton);
+        this.removeFormTemplateButton = document.querySelector(formManagerData.selectors.removeFormTemplateButton);
+        this.expandFormTemplateButton = document.querySelector(formManagerData.selectors.expandFormTemplateButton);
         this.currentFormDOM = [];
         this.currentFormData = [];
     };
@@ -16,10 +18,13 @@ export default class FormManagerNew {
      * Initialize "formTemplates" storage if it doesn't exist yet
      */
     initializeStorage() {
-        chrome.storage.local.get(formManagerData.storage.formTemplates, async (result) => {
-            if (!result[formManagerData.storage.formTemplates]) {
-                await this.saveDataToChromeStorage(formManagerData.storage.formTemplates, {});
-            }
+        return new Promise(resolve => {
+            chrome.storage.local.get(formManagerData.storage.formTemplates, async (result) => {
+                if (!result[formManagerData.storage.formTemplates]) {
+                    await this.saveDataToChromeStorage(formManagerData.storage.formTemplates, {});
+                    resolve();
+                }
+            })
         })
     };
 
@@ -36,9 +41,8 @@ export default class FormManagerNew {
                     option.text = item;
                     $(this.formTemplateSelector).append(option);
                 });
-
-                this.chooseActiveFrom();
                 this.addNotChosenPlaceholder();
+                this.chooseActiveFrom();
                 let formName = await this.getActiveForm();
                 let formData = await this.getForm(formName);
                 this.initializeForm(formName, formData);
@@ -52,10 +56,29 @@ export default class FormManagerNew {
     chooseActiveFrom() {
         chrome.storage.local.get(formManagerData.storage.activeFormTemplate, (result) => {
             if (result[formManagerData.storage.activeFormTemplate]) {
-                $(this.formTemplateSelector)[0].value = result[formManagerData.storage.activeFormTemplate];
+                if (this.hasOptionValue(this.formTemplateSelector, result[formManagerData.storage.activeFormTemplate])) {
+                    $(this.formTemplateSelector)[0].value = result[formManagerData.storage.activeFormTemplate];
+                } else $(this.formTemplateSelector)[0].value = formManagerData.option.notChosen;
             }
         })
     };
+
+    /**
+     * Check if element has an option with required value
+     * @param element
+     * @param value
+     */
+    hasOptionValue(element, value) {
+        let result = $(element).find('option').filter(function () {
+            if (this.value === value) {
+                return this;
+            } else return null
+        });
+
+        if (result[0] && result[0].value) {
+            return result[0].value
+        } else return null
+    }
 
     /**
      * Get form array
@@ -67,7 +90,7 @@ export default class FormManagerNew {
                 if (result[formManagerData.storage.formTemplates][templateName]) {
                     resolve(result[formManagerData.storage.formTemplates][templateName]);
                 } else {
-                    console.error("#ERROR IN getForm: following form wasn't found: [" + templateName + "]");
+                    console.log("#ERROR(minor?) IN getForm: following form wasn't found: [" + templateName + "]");
                     reject(null);
                 }
             })
@@ -91,17 +114,24 @@ export default class FormManagerNew {
     };
 
     /**
+     * Getter for currently selected option in form templates
+     */
+    getActiveFormOption() {
+        return $(this.formTemplateSelector)[0].value;
+    }
+
+    /**
      * Set 'Not chosen' placeholder to form formTemplates selector
      */
     addNotChosenPlaceholder() {
-        if ($(this.formTemplateSelector)[0].options.length === 0) {
-            let placeholderOption = $('<option></option>');
-            $(placeholderOption)
-                .attr('selected', true)
-                .attr('disabled', true)
-                .text('Not chosen');
-            $(this.formTemplateSelector).prepend(placeholderOption);
-        }
+        // if ($(this.formTemplateSelector)[0].options.length === 0) {
+        let placeholderOption = $('<option></option>');
+        $(placeholderOption)
+            .attr('selected', true)
+            .attr('disabled', true)
+            .text(formManagerData.option.notChosen);
+        $(this.formTemplateSelector).prepend(placeholderOption);
+        // }
     };
 
     /**
@@ -109,14 +139,14 @@ export default class FormManagerNew {
      * @param templateName {String}
      * @param template
      */
-    updateTemplateToStorage(templateName, template) {
+    updateStorageTemplate(templateName, template) {
         return new Promise(resolve => {
             chrome.storage.local.get([formManagerData.storage.formTemplates], async (result) => {
                 if (result[formManagerData.storage.formTemplates]) {
                     result[formManagerData.storage.formTemplates][templateName] = template;
                     await this.saveDataToChromeStorage(formManagerData.storage.formTemplates, result[formManagerData.storage.formTemplates]);
                     resolve();
-                } else console.error("#ERROR IN updateTemplateToStorage")
+                } else console.error("#ERROR IN updateStorageTemplate")
             })
         })
     };
@@ -135,6 +165,25 @@ export default class FormManagerNew {
                 resolve();
             });
         });
+    };
+
+    /**
+     * Remove template from formManagerData.storage.formTemplates
+     * @param templateName {String}
+     */
+    removeTemplateFromStorage(templateName) {
+        return new Promise((resolve, reject) => {
+            chrome.storage.local.get(formManagerData.storage.formTemplates, async (result) => {
+                if (result[formManagerData.storage.formTemplates][templateName]) {
+                    delete result[formManagerData.storage.formTemplates][templateName];
+                    await this.saveDataToChromeStorage(formManagerData.storage.formTemplates, result[formManagerData.storage.formTemplates]);
+                    resolve();
+                } else {
+                    console.error("#ERROR IN removeTemplateFromStorage: can't get template [" + templateName + "]");
+                    reject(null);
+                }
+            })
+        })
     };
 
     /**
@@ -172,7 +221,7 @@ export default class FormManagerNew {
     setupResultDOMListener() {
         chrome.runtime.onMessage.addListener(async (message) => {
             if (message.resultDOM) {
-                await this.updateTemplateToStorage(formManagerData.storage.scanResults, message.resultDOM);
+                await this.updateStorageTemplate(formManagerData.storage.scanResults, message.resultDOM);
                 await this.saveDataToChromeStorage(formManagerData.storage.activeFormTemplate, formManagerData.storage.scanResults);
                 this.initializeTemplatesDropDown();
             }
@@ -211,7 +260,7 @@ export default class FormManagerNew {
         for (let i = 0; i < this.currentFormDOM.length; i++) {
             $(this.currentFormDOM[i]).find("button").on("click", async () => {
                 this.currentFormData.splice(i, 1);
-                await this.updateTemplateToStorage(templateName, this.currentFormData);
+                await this.updateStorageTemplate(templateName, this.currentFormData);
                 this.initializeForm(templateName, this.currentFormData);
             })
         }
@@ -224,9 +273,22 @@ export default class FormManagerNew {
         $(this.addFormTemplateButton).click(async () => {
             if ($(this.addFormTemplateInput)[0].value) {
                 if (this.currentFormData.length > 0 && this.currentFormDOM.length > 0) {
-                    await this.updateTemplateToStorage($(this.addFormTemplateInput)[0].value, this.currentFormData);
+                    await this.updateStorageTemplate($(this.addFormTemplateInput)[0].value, this.currentFormData);
+                    this.initializeTemplatesDropDown();
+                    this.expandFormTemplateButton.click();
                 } else console.error("#ERROR IN setupAddFormButtonClickEvent: 'current' values aren't empty")
             } else console.error("#ERROR IN setupAddFormButtonClickEvent: incorrect input")
+        })
+    };
+
+    /**
+     * Setup remove template button click event
+     */
+    setupRemoveTemplateEvent() {
+        $(this.removeFormTemplateButton).click(async () => {
+            let activeFormOption = this.getActiveFormOption();
+            await this.removeTemplateFromStorage(activeFormOption);
+            this.initializeTemplatesDropDown();
         })
     };
 
