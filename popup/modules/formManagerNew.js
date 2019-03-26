@@ -16,24 +16,108 @@ export default class FormManagerNew {
      * Initialize "formTemplates" storage if it doesn't exist yet
      */
     initializeStorage() {
-        chrome.storage.local.get(formManagerData.storage.formTemplates, (result) => {
+        chrome.storage.local.get(formManagerData.storage.formTemplates, async (result) => {
             if (!result[formManagerData.storage.formTemplates]) {
-                this.saveDataToChromeStorage(formManagerData.storage.formTemplates, {});
+                await this.saveDataToChromeStorage(formManagerData.storage.formTemplates, {});
             }
         })
     };
 
     /**
-     * Update chrome template in storage with some data
-     * @param templateName {String}
-     * @param data
+     * Pull form list form storage and fill the drop down
      */
-    addTemplateToStorage(templateName, data) {
-        chrome.storage.local.get([formManagerData.storage.formTemplates], (result) => {
+    initializeTemplatesDropDown() {
+        chrome.storage.local.get(formManagerData.storage.formTemplates, async (result) => {
             if (result[formManagerData.storage.formTemplates]) {
-                result[formManagerData.storage.formTemplates][templateName] = data;
-                this.saveDataToChromeStorage(formManagerData.storage.formTemplates, result[formManagerData.storage.formTemplates]);
-            } else console.log("#ERROR IN addTemplateToStorage")
+                $(this.formTemplateSelector).empty();
+                let options = Object.keys(result[formManagerData.storage.formTemplates]);
+                options.forEach((item) => {
+                    let option = document.createElement('option');
+                    option.text = item;
+                    $(this.formTemplateSelector).append(option);
+                });
+
+                this.chooseActiveFrom();
+                this.addNotChosenPlaceholder();
+                let formName = await this.getActiveForm();
+                let formData = await this.getForm(formName);
+                this.initializeForm(formName, formData);
+            } else console.error("#ERROR IN initializeTemplatesDropDown");
+        });
+    };
+
+    /**
+     * Set active form as chosen by default
+     */
+    chooseActiveFrom() {
+        chrome.storage.local.get(formManagerData.storage.activeFormTemplate, (result) => {
+            if (result[formManagerData.storage.activeFormTemplate]) {
+                $(this.formTemplateSelector)[0].value = result[formManagerData.storage.activeFormTemplate];
+            }
+        })
+    };
+
+    /**
+     * Get form array
+     * @param templateName
+     */
+    getForm(templateName) {
+        return new Promise((resolve, reject) => {
+            chrome.storage.local.get(formManagerData.storage.formTemplates, (result) => {
+                if (result[formManagerData.storage.formTemplates][templateName]) {
+                    resolve(result[formManagerData.storage.formTemplates][templateName]);
+                } else {
+                    console.error("#ERROR IN getForm: following form wasn't found: [" + templateName + "]");
+                    reject(null);
+                }
+            })
+        })
+    }
+
+    /**
+     * Getter for active form
+     */
+    getActiveForm() {
+        return new Promise((resolve, reject) => {
+            chrome.storage.local.get(formManagerData.storage.activeFormTemplate, (result) => {
+                if (result[formManagerData.storage.activeFormTemplate]) {
+                    resolve(result[formManagerData.storage.activeFormTemplate]);
+                } else {
+                    console.error("#ERROR IN getActiveForm");
+                    reject(null);
+                }
+            })
+        })
+    };
+
+    /**
+     * Set 'Not chosen' placeholder to form formTemplates selector
+     */
+    addNotChosenPlaceholder() {
+        if ($(this.formTemplateSelector)[0].options.length === 0) {
+            let placeholderOption = $('<option></option>');
+            $(placeholderOption)
+                .attr('selected', true)
+                .attr('disabled', true)
+                .text('Not chosen');
+            $(this.formTemplateSelector).prepend(placeholderOption);
+        }
+    };
+
+    /**
+     * Update chrome template in storage with some template
+     * @param templateName {String}
+     * @param template
+     */
+    updateTemplateToStorage(templateName, template) {
+        return new Promise(resolve => {
+            chrome.storage.local.get([formManagerData.storage.formTemplates], async (result) => {
+                if (result[formManagerData.storage.formTemplates]) {
+                    result[formManagerData.storage.formTemplates][templateName] = template;
+                    await this.saveDataToChromeStorage(formManagerData.storage.formTemplates, result[formManagerData.storage.formTemplates]);
+                    resolve();
+                } else console.error("#ERROR IN updateTemplateToStorage")
+            })
         })
     };
 
@@ -46,35 +130,51 @@ export default class FormManagerNew {
     };
 
     saveDataToChromeStorage(storageName, data) {
-        chrome.storage.local.set({[storageName]: data});
-    }
+        return new Promise(resolve => {
+            chrome.storage.local.set({[storageName]: data}, () => {
+                resolve();
+            });
+        });
+    };
 
     /**
      * Setter for this.currentFormDOM
      * this.currentFormData should not be empty!!!
      */
     setFormDOM() {
+        this.currentFormDOM = [];
         if (this.currentFormData.length > 0) {
             this.currentFormData.forEach((item) => {
                 item.tagName === "INPUT"
                     ? this.currentFormDOM.push(this.createInputBlock(item.name, item.value))
-                    : this.currentFormDOM.push(this.createBlock(item.name, item.value))
+                    : this.currentFormDOM.push(this.createBlock(item.name, item.value, item.tagName))
             });
         }
+    };
+
+    /**
+     * Setup change event for drop down responsible for switching between active form templates
+     */
+    setupFormChangeEvent() {
+        $(this.formTemplateSelector).change(async (event) => {
+            await this.saveDataToChromeStorage(formManagerData.storage.activeFormTemplate, event.target.value);
+            chrome.storage.local.get(formManagerData.storage.formTemplates, (result) => {
+                if (result[formManagerData.storage.formTemplates][event.target.value]) {
+                    this.initializeForm(event.target.value, result[formManagerData.storage.formTemplates][event.target.value]);
+                } else console.error("#ERROR IN setupFormChangeEvent: storage not found [" + event.target.value + "]")
+            });
+        })
     };
 
     /**
      * Listen to content scripts for array of scanned DOM elements
      */
     setupResultDOMListener() {
-        chrome.runtime.onMessage.addListener((message) => {
+        chrome.runtime.onMessage.addListener(async (message) => {
             if (message.resultDOM) {
-                this.addTemplateToStorage(formManagerData.storage.scanResults, message.resultDOM);
-                this.setFormData(message.resultDOM);
-                this.setFormDOM();
-                this.setupRemoveFromDOMEvents();
-                this.setupRemoveFromStorageEvents(formManagerData.storage.scanResults);
-                this.buildDOM();
+                await this.updateTemplateToStorage(formManagerData.storage.scanResults, message.resultDOM);
+                await this.saveDataToChromeStorage(formManagerData.storage.activeFormTemplate, formManagerData.storage.scanResults);
+                this.initializeTemplatesDropDown();
             }
         })
     };
@@ -97,36 +197,38 @@ export default class FormManagerNew {
      */
     setupRemoveFromDOMEvents() {
         this.currentFormDOM.forEach((item) => {
-            $(item).find('button').click(() => {
+            $(item).find('button')[0].addEventListener("click", () => {
                 $(item).remove();
             })
         })
     };
 
     /**
-     * Events to remove field from template saved in storage as well
-     * this.currentFormDOM and this.currentFormData MUST NOT BE EMPTY!!!
-     * @param formName {String}
+     * Remove from storage as well
+     * @param templateName
      */
-    setupRemoveFromStorageEvents(formName) {
-        chrome.storage.local.get(formManagerData.storage.formTemplates, (result) => {
-            if (result[formManagerData.storage.formTemplates][formName]) {
+    setupRemoveFromStorageEvents(templateName) {
+        for (let i = 0; i < this.currentFormDOM.length; i++) {
+            $(this.currentFormDOM[i]).find("button").on("click", async () => {
+                this.currentFormData.splice(i, 1);
+                await this.updateTemplateToStorage(templateName, this.currentFormData);
+                this.initializeForm(templateName, this.currentFormData);
+            })
+        }
+    };
+
+    /**
+     * Setup click event for this.addFormTemplateButton
+     */
+    setupAddFormButtonClickEvent() {
+        $(this.addFormTemplateButton).click(async () => {
+            if ($(this.addFormTemplateInput)[0].value) {
                 if (this.currentFormData.length > 0 && this.currentFormDOM.length > 0) {
-                    for (let i = 0; i < this.currentFormDOM.length; i++) {
-                        $(this.currentFormDOM[i]).find('button').click(() => {
-                            this.currentFormData.splice(i, 1);
-                            this.currentFormDOM.splice(i, 1);
-                            chrome.storage.local.get(formManagerData.storage.formTemplates, (result) => {
-                                result[formManagerData.storage.formTemplates][formName].splice(i, 1);
-                                this.saveDataToChromeStorage(formManagerData.storage.formTemplates, result[formManagerData.storage.formTemplates]);
-                                this.rebuildDOM();
-                            })
-                        })
-                    }
-                } else console.log("#ERROR IN setupRemoveFromStorageEvents: current* is empty")
-            } else console.log("#ERROR IN setupRemoveFromStorageEvents: result[formManagerData.storage.formTemplates][formName] doesn't exist")
+                    await this.updateTemplateToStorage($(this.addFormTemplateInput)[0].value, this.currentFormData);
+                } else console.error("#ERROR IN setupAddFormButtonClickEvent: 'current' values aren't empty")
+            } else console.error("#ERROR IN setupAddFormButtonClickEvent: incorrect input")
         })
-    }
+    };
 
     /**
      * Add input field to page
@@ -155,7 +257,7 @@ export default class FormManagerNew {
      * @param tagName
      */
     createBlock(name, value, tagName) {
-        return $('<div class="item-container currentDOMForm-group mt-1 mb-1">' +
+        return $('<div class="item-container mt-1 mb-1">' +
             `                   <label class="mb-0" for="addDeviceInput">${name} [${tagName}]</label>` +
             '                   <div class="btn-group w-100">' +
             `                       <input type="text" class="form-control col-10" value='${value}'>` +
@@ -165,12 +267,25 @@ export default class FormManagerNew {
     };
 
     /**
+     * All steps combined in one method
+     */
+    initializeForm(templateName, form) {
+        if (templateName !== null) {
+            this.setFormData(form);
+            this.setFormDOM();
+            this.setupRemoveFromStorageEvents(templateName);
+            this.setupRemoveFromDOMEvents();
+            this.rebuildDOM();
+        }
+    };
+
+    /**
      * Clear DOM and then build
      */
     rebuildDOM() {
         $(this.scanResultsArea).empty();
         this.buildDOM();
-    }
+    };
 
     /**
      * Append all elements from this.currentFormDOM to this.scanResultsArea
@@ -180,6 +295,6 @@ export default class FormManagerNew {
             this.currentFormDOM.forEach((item) => {
                 $(this.scanResultsArea).append(item);
             })
-        } else console.log("#ERROR in buildDOM: this.currentFormDOM is empty")
+        } else console.error("#ERROR in buildDOM: this.currentFormDOM is empty");
     }
 }

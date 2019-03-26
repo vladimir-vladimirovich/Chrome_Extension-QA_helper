@@ -12,12 +12,16 @@ setupDeviceList();
 
 let formManagerNew = new FormManagerNew();
 formManagerNew.initializeStorage();
+formManagerNew.initializeTemplatesDropDown();
+
 formManagerNew.setupResultDOMListener();
 formManagerNew.setupScanButtonClickEvent();
+formManagerNew.setupAddFormButtonClickEvent();
+formManagerNew.setupFormChangeEvent();
 
 // let formManagerOld = new FormManagerOld();
 // formManagerOld.setupScanButtonClickEvent();
 // formManagerOld.setupResultDOMListener();
-// formManagerOld.setDefaultPlaceholder();
+// formManagerOld.addNotChosenPlaceholder();
 // formManagerOld.setupAddTemplateButtonClickEvent();
 // formManagerOld.setupTemplatesDropDown();
