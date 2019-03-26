@@ -1,6 +1,6 @@
 import formManagerData from "../data/formManagerData.js";
 
-export default class FormManagerNew {
+export default class FormManager {
     constructor() {
         this.scanButton = document.querySelector(formManagerData.selectors.scanButton);
         this.scanOptions = document.querySelector(formManagerData.selectors.scanOptions);
@@ -10,6 +10,7 @@ export default class FormManagerNew {
         this.addFormTemplateButton = document.querySelector(formManagerData.selectors.addFormTemplateButton);
         this.removeFormTemplateButton = document.querySelector(formManagerData.selectors.removeFormTemplateButton);
         this.expandFormTemplateButton = document.querySelector(formManagerData.selectors.expandFormTemplateButton);
+        this.pasteFormButton = document.querySelector(formManagerData.selectors.pasteFormButton);
         this.currentFormDOM = [];
         this.currentFormData = [];
     };
@@ -18,13 +19,10 @@ export default class FormManagerNew {
      * Initialize "formTemplates" storage if it doesn't exist yet
      */
     initializeStorage() {
-        return new Promise(resolve => {
-            chrome.storage.local.get(formManagerData.storage.formTemplates, async (result) => {
-                if (!result[formManagerData.storage.formTemplates]) {
-                    await this.saveDataToChromeStorage(formManagerData.storage.formTemplates, {});
-                    resolve();
-                }
-            })
+        chrome.storage.local.get(formManagerData.storage.formTemplates, async (result) => {
+            if (!result[formManagerData.storage.formTemplates]) {
+                await this.saveDataToChromeStorage(formManagerData.storage.formTemplates, {});
+            }
         })
     };
 
@@ -293,6 +291,17 @@ export default class FormManagerNew {
     };
 
     /**
+     * Setup event for pasteFormButton
+     */
+    setupPasteFormClickEvent() {
+        $(this.pasteFormButton).click(() => {
+            chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+                chrome.tabs.sendMessage(tabs[0].id, {setActiveTemplate: this.currentFormData});
+            });
+        })
+    }
+
+    /**
      * Add input field to page
      * @param name
      * @param value
@@ -358,5 +367,23 @@ export default class FormManagerNew {
                 $(this.scanResultsArea).append(item);
             })
         } else console.error("#ERROR in buildDOM: this.currentFormDOM is empty");
+    };
+
+    /**
+     * Complete module setup
+     */
+    setupFormManagerModule() {
+        // Create main storage variable
+        this.initializeStorage();
+        // Setup drop down values and build form
+        this.initializeTemplatesDropDown();
+        // Listener for messages from content scripts
+        this.setupResultDOMListener();
+        // Setup .click() and .change()
+        this.setupScanButtonClickEvent();
+        this.setupAddFormButtonClickEvent();
+        this.setupFormChangeEvent();
+        this.setupRemoveTemplateEvent();
+        this.setupPasteFormClickEvent();
     }
 }
