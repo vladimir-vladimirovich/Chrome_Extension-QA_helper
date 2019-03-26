@@ -6,12 +6,17 @@ let formManagerData = {
         scanResultsArea: "[id='scanResultsArea']",
         formTemplateSelector: "[id='formTemplateSelector']",
         addFormTemplateInput: "[id='addFormTemplateInput']",
-        addFormTemplateButton: "[id='addFormTemplateButton']"
+        addFormTemplateButton: "[id='addFormTemplateButton']",
+        removeFormTemplateButton: "[id='deleteFormTemplateButton']",
+        expandFormTemplateButton: "[id='expandFormTemplateButton']"
     },
     storage: {
         scanResults: "scanResults",
         formTemplates: "formTemplates",
         activeFormTemplate: "activeFormTemplate"
+    },
+    option: {
+        notChosen: "Not chosen"
     }
 };
 
