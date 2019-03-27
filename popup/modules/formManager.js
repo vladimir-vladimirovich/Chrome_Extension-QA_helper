@@ -19,10 +19,14 @@ export default class FormManager {
      * Initialize "formTemplates" storage if it doesn't exist yet
      */
     initializeStorage() {
-        chrome.storage.local.get(formManagerData.storage.formTemplates, async (result) => {
-            if (!result[formManagerData.storage.formTemplates]) {
-                await this.saveDataToChromeStorage(formManagerData.storage.formTemplates, {});
-            }
+        return new Promise(resolve => {
+            chrome.storage.local.get(formManagerData.storage.formTemplates, async (result) => {
+                if (!result[formManagerData.storage.formTemplates]) {
+                    await this.saveDataToChromeStorage(formManagerData.storage.formTemplates, {});
+                    resolve();
+                }
+                resolve();
+            })
         })
     };
 
@@ -284,6 +288,8 @@ export default class FormManager {
         $(this.removeFormTemplateButton).click(async () => {
             let activeFormOption = this.getActiveFormOption();
             await this.removeTemplateFromStorage(activeFormOption);
+            chrome.storage.local.remove(formManagerData.storage.activeFormTemplate);
+            $(this.scanResultsArea).empty();
             this.initializeTemplatesDropDown();
         })
     };
@@ -340,11 +346,13 @@ export default class FormManager {
      */
     initializeForm(templateName, form) {
         if (templateName !== null) {
+            this.changeDisableStatus(this.scanResultsArea, true);
             this.setFormData(form);
             this.setFormDOM();
             this.setupRemoveFromStorageEvents(templateName);
             this.setupRemoveFromDOMEvents();
             this.rebuildDOM();
+            this.changeDisableStatus(this.scanResultsArea, false);
         }
     };
 
@@ -368,20 +376,31 @@ export default class FormManager {
     };
 
     /**
+     * Add "disabled" = false attribute to all scanResultsArea elements
+     * @param element {Element}
+     * @param status {Boolean}
+     */
+    changeDisableStatus(element, status) {
+        $(element).find('button').prop("disabled", status);
+        $(element).find('input').prop("disabled", status);
+        $(element).find('select').prop("disabled", status);
+    };
+
+    /**
      * Complete module setup
      */
     setupFormManagerModule() {
         // Create main storage variable
-        this.initializeStorage();
+        this.initializeStorage()
         // Setup drop down values and build form
-        this.initializeTemplatesDropDown();
-        // Listener for messages from content scripts
-        this.setupResultDOMListener();
-        // Setup .click() and .change()
-        this.setupScanButtonClickEvent();
-        this.setupAddFormButtonClickEvent();
-        this.setupFormChangeEvent();
-        this.setupRemoveTemplateEvent();
-        this.setupPasteFormClickEvent();
+            .then(() => this.initializeTemplatesDropDown())
+            // Listener for messages from content scripts
+            .then(() => this.setupResultDOMListener())
+            // Setup .click() and .change()
+            .then(() => this.setupScanButtonClickEvent())
+            .then(() => this.setupAddFormButtonClickEvent())
+            .then(() => this.setupFormChangeEvent())
+            .then(() => this.setupRemoveTemplateEvent())
+            .then(() => this.setupPasteFormClickEvent());
     }
 }
