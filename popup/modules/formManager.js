@@ -306,6 +306,23 @@ export default class FormManager {
     };
 
     /**
+     *
+     * @param templateName
+     */
+    setupInputFocusoutEvent(templateName) {
+        for (let i = 0; i < this.currentFormDOM.length; i++) {
+            $(this.currentFormDOM[i]).find("input").on("focusout", async (e) => {
+                if (e.target.value !== this.currentFormData[i].value) {
+                    let form = await this.getForm(templateName);
+                    form[i].value = e.target.value;
+                    await this.updateStorageTemplate(templateName, form);
+                    this.initializeForm(templateName, form);
+                }
+            })
+        }
+    };
+
+    /**
      * Add input field to page
      * @param name
      * @param value
@@ -353,6 +370,7 @@ export default class FormManager {
             this.setupRemoveFromDOMEvents();
             this.rebuildDOM();
             this.changeDisableStatus(this.scanResultsArea, false);
+            this.setupInputFocusoutEvent(templateName);
         }
     };
 
@@ -401,6 +419,7 @@ export default class FormManager {
             .then(() => this.setupAddFormButtonClickEvent())
             .then(() => this.setupFormChangeEvent())
             .then(() => this.setupRemoveTemplateEvent())
-            .then(() => this.setupPasteFormClickEvent());
+            .then(() => this.setupPasteFormClickEvent())
+        // .then(() => this.setupInputFocusoutEvent())
     }
 }

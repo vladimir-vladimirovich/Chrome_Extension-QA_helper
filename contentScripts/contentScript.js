@@ -230,14 +230,14 @@ class QAAPageElement {
 
     /**
      * Scan for all element's attributes and combine them to CSS selector
-     * Class attribute removed from combination
+     * Class and style attributes removed from combination
      * @param element
      */
     static buildAttributesSelector(element) {
         let resultSelector = "";
         let i = 0;
         while (element.attributes[i]) {
-            if (element.attributes[i].nodeName !== "class") {
+            if (element.attributes[i].nodeName !== "class" && element.attributes[i].nodeName !== "style") {
                 resultSelector = resultSelector + "[" + element.attributes[i].nodeName + "=\"" + element.attributes[i].value + "\"]";
             }
             i++;
