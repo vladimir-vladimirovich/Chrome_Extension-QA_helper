@@ -199,9 +199,9 @@ class QAAPageElement {
                 while (nodesTree[m].attributes[n]) {
                     if (nodesTree[m].attributes[n].nodeName !== "class" && nodesTree[m].attributes[n].nodeName !== "style") {
                         if (QAAPageElement.checkIfUnique(
-                            `[${nodesTree[m].attributes[n].nodeName}="${nodesTree[m].attributes[n].value}"] ${selector}`)
+                            `[${nodesTree[m].attributes[n].nodeName}=\"${nodesTree[m].attributes[n].value}\"] ${selector}`)
                         ) {
-                            resultUniqueSelector = `[${nodesTree[m].attributes[n].nodeName}="${nodesTree[m].attributes[n].value}"] ${selector}`;
+                            resultUniqueSelector = `[${nodesTree[m].attributes[n].nodeName}=\"${nodesTree[m].attributes[n].value}\"] ${selector}`;
                             status = true;
                             break;
                         }
@@ -223,7 +223,7 @@ class QAAPageElement {
      * @returns {boolean}
      */
     static checkIfUnique(selector) {
-        if (document.querySelector(selector)) {
+        if (selector && document.querySelector(selector)) {
             return !document.querySelectorAll(selector)[1];
         }
     };
@@ -238,7 +238,7 @@ class QAAPageElement {
         let i = 0;
         while (element.attributes[i]) {
             if (element.attributes[i].nodeName !== "class") {
-                resultSelector = resultSelector + "[" + element.attributes[i].nodeName + "='" + element.attributes[i].value + "']";
+                resultSelector = resultSelector + "[" + element.attributes[i].nodeName + "=\"" + element.attributes[i].value + "\"]";
             }
             i++;
         }
@@ -276,12 +276,12 @@ class QAAPageElement {
     static buildUniqueCSSSelectorTypeOne(element) {
         // 1
         if (element.id) {
-            return "[id='" + element.id + "']";
+            return "[id=\'" + element.id + "\']";
         }
         // 2
         let name = "";
         if (element.name) {
-            name = "[name='" + element.name + "']";
+            name = "[name=\'" + element.name + "\']";
             if (QAAPageElement.checkIfUnique(name)) {
                 return name;
             }

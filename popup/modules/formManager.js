@@ -116,20 +116,18 @@ export default class FormManager {
      */
     getActiveFormOption() {
         return $(this.formTemplateSelector)[0].value;
-    }
+    };
 
     /**
      * Set 'Not chosen' placeholder to form formTemplates selector
      */
     addNotChosenPlaceholder() {
-        // if ($(this.formTemplateSelector)[0].options.length === 0) {
         let placeholderOption = $('<option></option>');
         $(placeholderOption)
             .attr('selected', true)
             .attr('disabled', true)
             .text(formManagerData.option.notChosen);
         $(this.formTemplateSelector).prepend(placeholderOption);
-        // }
     };
 
     /**
@@ -299,7 +297,7 @@ export default class FormManager {
                 chrome.tabs.sendMessage(tabs[0].id, {setActiveTemplate: this.currentFormData});
             });
         })
-    }
+    };
 
     /**
      * Add input field to page
