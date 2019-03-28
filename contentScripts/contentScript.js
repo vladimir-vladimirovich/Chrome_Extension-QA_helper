@@ -25,7 +25,8 @@ class QAAPopupCommunication {
                 tagName: element.tagName,
                 name: element.name,
                 value: element.value,
-                cssSelectors: QAAPageElement.getUniqueSelectors(element)
+                cssSelectors: QAAPageElement.getUniqueSelectors(element),
+                state: "None"
             }
         });
         // Send new array to pop up

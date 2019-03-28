@@ -306,6 +306,21 @@ export default class FormManager {
     };
 
     /**
+     * Setup focusout event for input fields in scanResultsArea
+     */
+    setupFocusoutEvent(templateName) {
+        for (let i = 0; i < this.currentFormDOM.length; i++) {
+            $(this.currentFormDOM[i]).find("input").on("focusout", async (event) => {
+                if (event.target.value !== this.currentFormData[i].value) {
+                    let form = await this.getForm(templateName);
+                    form[i].value = event.target.value;
+                    this.updateStorageTemplate(templateName, form)
+                }
+            })
+        }
+    };
+
+    /**
      * Add input field to page
      * @param name
      * @param value
@@ -353,6 +368,7 @@ export default class FormManager {
             this.setupRemoveFromDOMEvents();
             this.rebuildDOM();
             this.changeDisableStatus(this.scanResultsArea, false);
+            this.setupFocusoutEvent(templateName);
         }
     };
 
