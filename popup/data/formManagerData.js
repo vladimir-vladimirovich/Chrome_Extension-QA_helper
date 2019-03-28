@@ -16,7 +16,11 @@ let formManagerData = {
         activeFormTemplate: "activeFormTemplate"
     },
     option: {
-        notChosen: "Not chosen"
+        notChosen: "Not chosen",
+        none: "None",
+        username: "Username",
+        realEmail: "Real email",
+        internalEmail: "Internal email"
     }
 };
 
