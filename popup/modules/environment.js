@@ -3,7 +3,7 @@ let defaultUrl = 'defaultURL';
 let defaultVersionPath = 'defaultVersionPath';
 let versionStorage = 'versionStorage';
 
-let environmentGroupRadio = document.getElementsByName('environmentGroupRadio');
+let environmentGroupRadio = document.getElementsByName('environmentRadioGroup');
 
 let environmentSelector = document.getElementById('environmentSelector');
 let deleteSelectedEnvButton = document.getElementById("deleteSelectedEnvButton");
