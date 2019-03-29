@@ -77,7 +77,7 @@ export default class EnvironmentManager {
             .then(environmentsArray => {
                 this.fillSelectorWithOptions(this.environmentSelector, environmentsArray);
                 this.addNotChosenPlaceholder(this.environmentSelector);
-                return this.getActiveEnvironment();
+                return this.getActive(environmentManagerData.storage.activeEnvironment);
             })
             .then(activeEnv => {
                 this.chooseActiveOption(this.environmentSelector, activeEnv);
@@ -92,7 +92,7 @@ export default class EnvironmentManager {
             .then(versions => {
                 this.fillSelectorWithOptions(this.versionSelector, versions);
                 this.addNotChosenPlaceholder(this.versionSelector);
-                return this.getActiveVersion()
+                return this.getActive(environmentManagerData.storage.activeVersion)
             })
             .then(activeVersion => {
                 this.chooseActiveOption(this.versionSelector, activeVersion)
@@ -201,9 +201,42 @@ export default class EnvironmentManager {
      * Change event for version selector
      */
     setupVersionSelectorChangeEvent() {
-        $(this.versionSelector).change( async event => {
+        $(this.versionSelector).change(async event => {
             await this.saveDataToStorage(environmentManagerData.storage.activeVersion, event.target.value);
             this.initializeVersionsSelector();
+        })
+    };
+
+    /**
+     * Remove selected env
+     */
+    setupRemoveEnvironmentEvent() {
+        $(this.environmentRemoveButton).click(() => {
+            this.getActiveGroup()
+                .then(activeGroup => {
+                    if ($(this.environmentSelector).val() !== formManagerData.option.notChosen) {
+                        let selectorValue = $(this.environmentSelector).val();
+                        return this.removeEnvFromStorage(activeGroup, selectorValue);
+                    }
+                })
+                .then(() => {
+                    this.initializeEnvironmentsSelector();
+                })
+        })
+    };
+
+    /**
+     * Remove selected version
+     */
+    setupRemoveVersionEvent() {
+        $(this.versionRemoveButton).click(async () => {
+            let selectorValue = $(this.versionSelector).val();
+            if (selectorValue !== formManagerData.option.notChosen) {
+                let versions = await this.getVersions();
+                versions.splice(versions.indexOf(selectorValue), 1);
+                await this.saveDataToStorage(environmentManagerData.storage.versions, versions);
+                this.initializeVersionsSelector();
+            }
         })
     };
 
@@ -229,7 +262,6 @@ export default class EnvironmentManager {
                 if (result[environmentManagerData.storage.environments] && result[environmentManagerData.storage.environments][group]) {
                     resolve(result[environmentManagerData.storage.environments][group]);
                 } else {
-                    console.log("#ERROR IN getEnvironments");
                     resolve(null);
                 }
             })
@@ -250,24 +282,11 @@ export default class EnvironmentManager {
     /**
      * Returns active environment
      */
-    getActiveEnvironment() {
+    getActive(storage) {
         return new Promise(resolve => {
-            chrome.storage.local.get(environmentManagerData.storage.activeEnvironment, result => {
-                if (result[environmentManagerData.storage.activeEnvironment]) {
-                    resolve(result[environmentManagerData.storage.activeEnvironment]);
-                } else resolve(null);
-            })
-        })
-    };
-
-    /**
-     * Returns active version
-     */
-    getActiveVersion() {
-        return new Promise(resolve => {
-            chrome.storage.local.get(environmentManagerData.storage.activeVersion, result => {
-                if (result[environmentManagerData.storage.activeVersion]) {
-                    resolve(result[environmentManagerData.storage.activeVersion]);
+            chrome.storage.local.get(storage, result => {
+                if (result[storage]) {
+                    resolve(result[storage]);
                 } else resolve(null);
             })
         })
@@ -292,6 +311,28 @@ export default class EnvironmentManager {
                 if (result[environmentManagerData.storage.environments]) {
                     result[environmentManagerData.storage.environments][storage].push(data);
                     await this.saveDataToStorage(environmentManagerData.storage.environments, result[environmentManagerData.storage.environments]);
+                    resolve();
+                }
+            })
+        })
+    };
+
+    /**
+     * remove value from environments storage
+     * @param storage
+     * @param data
+     */
+    removeEnvFromStorage(storage, data) {
+        return new Promise(resolve => {
+            chrome.storage.local.get(environmentManagerData.storage.environments, async result => {
+                if (result[environmentManagerData.storage.environments] && result[environmentManagerData.storage.environments][storage]) {
+                    result[environmentManagerData.storage.environments][storage].splice(
+                        result[environmentManagerData.storage.environments][storage].indexOf(data), 1
+                    );
+                    await this.saveDataToStorage(
+                        environmentManagerData.storage.environments,
+                        result[environmentManagerData.storage.environments]
+                    );
                     resolve();
                 }
             })
@@ -359,6 +400,9 @@ export default class EnvironmentManager {
 
                 this.setupAddLinkButtonClickEvent();
                 this.setupAddVersionClickEvent();
+
+                this.setupRemoveEnvironmentEvent();
+                this.setupRemoveVersionEvent();
             })
     }
 }
