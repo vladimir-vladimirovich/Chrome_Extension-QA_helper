@@ -50,7 +50,7 @@ export default class FormManager {
                 let formName = await this.getActiveForm();
                 let formData = await this.getForm(formName);
                 this.initializeForm(formName, formData);
-            } else console.error("#ERROR IN initializeTemplatesDropDown");
+            } else console.log("#ERROR IN initializeTemplatesDropDown");
         });
     };
 
@@ -82,7 +82,7 @@ export default class FormManager {
         if (result[0] && result[0].value) {
             return result[0].value
         } else return null
-    }
+    };
 
     /**
      * Get form array

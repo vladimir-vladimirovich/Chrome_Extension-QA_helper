@@ -19,7 +19,7 @@ export default class EnvironmentManager {
     /**
      * Create "environments" storage variable if it doesn't exist
      */
-    initializeStorage() {
+    initializeEnvironmentsStorage() {
         return new Promise(resolve => {
             chrome.storage.local.get(environmentManagerData.storage.environments, result => {
                 if (!result[environmentManagerData.storage.environments]) {
@@ -32,7 +32,21 @@ export default class EnvironmentManager {
                         () => {
                             resolve();
                         })
-                }
+                } else resolve();
+            })
+        })
+    };
+
+    /**
+     * Create "versions" storage variable if it doesn't exist
+     */
+    initializeVersionsStorage() {
+        return new Promise(resolve => {
+            chrome.storage.local.get(environmentManagerData.storage.versions, result => {
+                if (!result[environmentManagerData.storage.versions]) {
+                    chrome.storage.local.set({[environmentManagerData.storage.versions]: []});
+                    resolve();
+                } else resolve();
             })
         })
     };
@@ -40,46 +54,221 @@ export default class EnvironmentManager {
     /**
      * Choose active group
      */
-    async initializeSetDefaultActiveGroup() {
-        let activeGroup = await this.getActiveGroup();
-        if (activeGroup) {
-            $(this.environmentRadioGroup).filter(function () {
-                return $(this).val() === activeGroup;
-            }).parent().addClass("active")
+    initializeSetDefaultActiveGroup() {
+        // let activeGroup = await this.getActiveGroup();
+        this.getActiveGroup()
+            .then(result => {
+                if (result) {
+                    $(this.environmentRadioGroup).filter(function () {
+                        return $(this).val() === result;
+                    }).parent().addClass("active")
+                }
+            })
+    };
+
+    /**
+     * Fill environments dropdown with values
+     */
+    initializeEnvironmentsSelector() {
+        this.getActiveGroup()
+            .then(activeGroup => {
+                return this.getEnvironments(activeGroup);
+            })
+            .then(environmentsArray => {
+                this.fillSelectorWithOptions(this.environmentSelector, environmentsArray);
+                this.addNotChosenPlaceholder(this.environmentSelector);
+                return this.getActiveEnvironment();
+            })
+            .then(activeEnv => {
+                this.chooseActiveOption(this.environmentSelector, activeEnv);
+            })
+    };
+
+    /**
+     * Fill versions dropdown with values
+     */
+    initializeVersionsSelector() {
+        this.getVersions()
+            .then(versions => {
+                this.fillSelectorWithOptions(this.versionSelector, versions);
+                this.addNotChosenPlaceholder(this.versionSelector);
+                return this.getActiveVersion()
+            })
+            .then(activeVersion => {
+                this.chooseActiveOption(this.versionSelector, activeVersion)
+            })
+    };
+
+    /**
+     * Fill selector with options
+     * @param element
+     * @param array
+     */
+    fillSelectorWithOptions(element, array) {
+        $(element).empty();
+        if (array) {
+            array.forEach(item => {
+                let option = document.createElement('option');
+                option.text = item;
+                $(element).append(option);
+            });
         }
     };
 
     /**
-     *
+     * Choose active option or not chosen if active doesn't exist in the list
+     * @param element
+     * @param activeOption
      */
-    setupAddLinkButtonClickEvent(inputField, addButton, expandButton) {
-        $(addButton).click(async () => {
+    chooseActiveOption(element, activeOption) {
+        if (this.hasOptionValue(element, activeOption)) {
+            this.setOptionValueTo(element, activeOption)
+        } else this.setOptionValueTo(element, formManagerData.option.notChosen)
+    };
+
+    /**
+     * Check if element has an option with required value
+     * @param element
+     * @param value
+     */
+    hasOptionValue(element, value) {
+        let result = $(element).find('option').filter(function () {
+            if (this.value === value) {
+                return this;
+            } else return null
+        });
+
+        if (result[0] && result[0].value) {
+            return result[0].value
+        } else return null
+    };
+
+    /**
+     * Set option value
+     * @param element
+     * @param optionValue
+     */
+    setOptionValueTo(element, optionValue) {
+        $(element)[0].value = optionValue;
+    }
+
+    /**
+     * Setup click event on addButton
+     */
+    setupAddLinkButtonClickEvent() {
+        $(this.environmentAddButton).click(async () => {
             let activeGroup = await this.getActiveGroup();
-            let inputValue = $(inputField).val();
+            let inputValue = $(this.environmentInput).val();
             await this.addEnvironmentToStorage(activeGroup, inputValue);
-            $(expandButton).click();
+            $(this.environmentExpandButton).click();
+            this.initializeEnvironmentsSelector(this.environmentSelector);
         })
     };
 
     /**
-     *
+     * Setup add event for versionAddButton
+     */
+    setupAddVersionClickEvent() {
+        $(this.versionAddButton).click(async () => {
+            let inputValue = $(this.versionInput).val();
+            await this.addVersionToStorage(inputValue);
+            $(this.versionExpandButton).click();
+            this.initializeVersionsSelector();
+        })
+    };
+
+    /**
+     * Change event for radio buttons in environmentRadioGroup
      */
     setupChangeActiveGroupEvent() {
         $(this.environmentRadioGroup).change(event => {
             this.updateActiveGroup(event.target.value);
+            this.initializeEnvironmentsSelector(this.environmentSelector);
         })
     };
 
+    /**
+     * Change event for environment selector
+     */
+    setupEnvSelectorChangeEvent() {
+        $(this.environmentSelector).change(async (event) => {
+            await this.saveDataToStorage(environmentManagerData.storage.activeEnvironment, event.target.value);
+            this.initializeEnvironmentsSelector();
+        })
+    };
+
+    /**
+     * Change event for version selector
+     */
+    setupVersionSelectorChangeEvent() {
+        $(this.versionSelector).change( async event => {
+            await this.saveDataToStorage(environmentManagerData.storage.activeVersion, event.target.value);
+            this.initializeVersionsSelector();
+        })
+    };
 
     /**
      * Returns currently active environment group
      */
     getActiveGroup() {
-        return new Promise((resolve, reject) => {
+        return new Promise(resolve => {
             chrome.storage.local.get(environmentManagerData.storage.activeGroup, result => {
                 if (result[environmentManagerData.storage.activeGroup]) {
                     resolve(result[environmentManagerData.storage.activeGroup])
-                } else reject(null);
+                } else resolve(null);
+            })
+        })
+    };
+
+    /**
+     * Returns array of environments from group
+     */
+    getEnvironments(group) {
+        return new Promise(resolve => {
+            chrome.storage.local.get(environmentManagerData.storage.environments, result => {
+                if (result[environmentManagerData.storage.environments] && result[environmentManagerData.storage.environments][group]) {
+                    resolve(result[environmentManagerData.storage.environments][group]);
+                } else {
+                    console.log("#ERROR IN getEnvironments");
+                    resolve(null);
+                }
+            })
+        })
+    };
+
+    /**
+     * Returns array of saved versions
+     */
+    getVersions() {
+        return new Promise(resolve => {
+            chrome.storage.local.get(environmentManagerData.storage.versions, result => {
+                resolve(result[environmentManagerData.storage.versions]);
+            })
+        })
+    };
+
+    /**
+     * Returns active environment
+     */
+    getActiveEnvironment() {
+        return new Promise(resolve => {
+            chrome.storage.local.get(environmentManagerData.storage.activeEnvironment, result => {
+                if (result[environmentManagerData.storage.activeEnvironment]) {
+                    resolve(result[environmentManagerData.storage.activeEnvironment]);
+                } else resolve(null);
+            })
+        })
+    };
+
+    /**
+     * Returns active version
+     */
+    getActiveVersion() {
+        return new Promise(resolve => {
+            chrome.storage.local.get(environmentManagerData.storage.activeVersion, result => {
+                if (result[environmentManagerData.storage.activeVersion]) {
+                    resolve(result[environmentManagerData.storage.activeVersion]);
+                } else resolve(null);
             })
         })
     };
@@ -100,10 +289,25 @@ export default class EnvironmentManager {
     addEnvironmentToStorage(storage, data) {
         return new Promise(resolve => {
             chrome.storage.local.get(environmentManagerData.storage.environments, async (result) => {
-                console.log(result);
                 if (result[environmentManagerData.storage.environments]) {
                     result[environmentManagerData.storage.environments][storage].push(data);
                     await this.saveDataToStorage(environmentManagerData.storage.environments, result[environmentManagerData.storage.environments]);
+                    resolve();
+                }
+            })
+        })
+    };
+
+    /**
+     * Update versions storage
+     * @param version
+     */
+    addVersionToStorage(version) {
+        return new Promise(resolve => {
+            chrome.storage.local.get(environmentManagerData.storage.versions, async result => {
+                if (result[environmentManagerData.storage.versions]) {
+                    result[environmentManagerData.storage.versions].push(version);
+                    await this.saveDataToStorage(environmentManagerData.storage.versions, result[environmentManagerData.storage.versions]);
                     resolve();
                 }
             })
@@ -139,10 +343,22 @@ export default class EnvironmentManager {
      * Complete environment manager module setup
      */
     setup() {
-        this.setupAddLinkButtonClickEvent(this.environmentInput, this.environmentAddButton, this.environmentExpandButton);
-        this.setupAddLinkButtonClickEvent(this.versionInput, this.versionAddButton, this.versionExpandButton);
+        this.initializeEnvironmentsStorage()
+            .then(() => {
+                return this.initializeVersionsStorage();
+            })
+            .then(() => {
+                this.initializeSetDefaultActiveGroup();
+                this.initializeEnvironmentsSelector();
+                this.initializeVersionsSelector();
 
-        this.addNotChosenPlaceholder(this.environmentSelector);
-        this.addNotChosenPlaceholder(this.versionSelector);
+                this.setupChangeActiveGroupEvent();
+
+                this.setupEnvSelectorChangeEvent();
+                this.setupVersionSelectorChangeEvent();
+
+                this.setupAddLinkButtonClickEvent();
+                this.setupAddVersionClickEvent();
+            })
     }
 }

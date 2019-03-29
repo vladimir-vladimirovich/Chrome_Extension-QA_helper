@@ -12,7 +12,7 @@ let formManager = new FormManager();
 formManager.setupFormManagerModule();
 
 let environmentManager = new EnvironmentManager();
-environmentManager.initializeStorage();
-environmentManager.initializeSetDefaultActiveGroup();
-environmentManager.setupChangeActiveGroupEvent();
+// environmentManager.initializeEnvironmentsStorage();
+// environmentManager.initializeSetDefaultActiveGroup();
+// environmentManager.setupChangeActiveGroupEvent();
 environmentManager.setup();
