@@ -1,4 +1,4 @@
-import {environment} from "../config/projectProperties.js";
+import {projectProperties} from "../config/projectProperties.js";
 import {contextMenus} from "../contextMenus.js"
 import {customComments} from "../templates/cutomsComments.js";
 
@@ -10,16 +10,16 @@ let checkDefaultURL = () => {
         console.log("checking storage...");
         if (result.defaultURL) {
             console.log("result.defaultURL: " + result.defaultURL);
-            environment.defaultEnvironmentURL = result.defaultURL;
+            projectProperties.defaultEnvironmentURL = result.defaultURL;
         }
     });
     chrome.storage.local.get(['defaultVersionPath'], function (result) {
         console.log("checking storage...");
         if (result.defaultVersionPath) {
             console.log("result.defaultVersionPath: " + result.defaultVersionPath);
-            environment.defaultFEJSONPass = result.defaultVersionPath;
+            projectProperties.defaultFEJSONPass = result.defaultVersionPath;
         }
-    })
+    });
 };
 
 let formatDevicesArrayToString = function(devicesArray) {
@@ -51,13 +51,13 @@ let checkDefaultDevicesList = () => {
  */
 export default {
     init() {
-        //Listener for environment URL update
+        //Listener for projectProperties URL update
         chrome.runtime.onMessage.addListener((request) => {
             if (request.URLChange) {
-                environment.defaultEnvironmentURL = request.URLChange;
+                projectProperties.defaultEnvironmentURL = request.URLChange;
             }
             if (request.versionPathChange) {
-                environment.defaultFEJSONPass = request.versionPathChange;
+                projectProperties.defaultFEJSONPass = request.versionPathChange;
             }
             if (request.deviceListChange) {
                 // Update template

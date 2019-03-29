@@ -20,7 +20,11 @@ let environmentManagerData = {
         versions: "versions",
         test: "testUrlStorage",
         stg: "stgUrlStorage",
-        prod: "prodUrlStorage"
+        prod: "prodUrlStorage",
+    },
+    messages: {
+        urlChange: "URLChange",
+        versionPathChange: "versionPathChange"
     }
 };
 

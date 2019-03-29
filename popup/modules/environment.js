@@ -18,7 +18,7 @@ let stgUrlStorage = "stgUrlStorage";
 let prodUrlStorage = "prodUrlStorage";
 
 /**
- * Pull from storage active env group(TEST or STG or PROD) and fill the environment with actual data + version list
+ * Pull from storage active env group(TEST or STG or PROD) and fill the projectProperties with actual data + version list
  */
 let initializeEnvironmentGroup = function () {
     chrome.storage.local.get([currentEnvironmentGroup], function (result) {
@@ -107,7 +107,7 @@ let setupDropdownChangeEvent = function (element, defaultStorage, message) {
 };
 
 /**
- * Updates environment drop down during radio[TST, STG, PROD] change accordingly
+ * Updates projectProperties drop down during radio[TST, STG, PROD] change accordingly
  * @param {element} radioGroup
  */
 let setupRadioButtonChange = (radioGroup) => {

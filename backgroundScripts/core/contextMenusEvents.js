@@ -1,4 +1,4 @@
-import {environment} from "../config/projectProperties.js";
+import {projectProperties} from "../config/projectProperties.js";
 import {commentsCollection} from "../templates/commentsCollection.js";
 import {customComments} from "../templates/cutomsComments.js";
 import RequestHandler from "./requestHandler.js";
@@ -15,15 +15,15 @@ let combineStrings = (id, text, version) => {
     if (id.includes('comment')) {
         return `${text}` +
             `${customComments.comments.devicesStart}${customComments.devices}${customComments.comments.endLine}` +
-            `${customComments.comments.environmentURLStart}${environment.defaultEnvironmentURL} | \n` +
+            `${customComments.comments.environmentURLStart}${projectProperties.defaultEnvironmentURL} | \n` +
             `${customComments.comments.versionStart}${version}${customComments.comments.endLine}`+
             `{panel}`;
     } else {
-        return `*STR:*\n# Open ${environment.defaultEnvironmentURL}\n` +
+        return `*STR:*\n# Open ${projectProperties.defaultEnvironmentURL}\n` +
             `${text}` +
             `${customComments.devices}\n` +
             `\n${customComments.description.environmentUrlStart}` +
-            `${environment.defaultEnvironmentURL}\n` +
+            `${projectProperties.defaultEnvironmentURL}\n` +
             `${version}`;
     }
 };
@@ -58,16 +58,3 @@ export default {
         Object.values(commentsCollection).map((comment) => addOnClickHandler(comment));
     }
 };
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -481,7 +481,7 @@ export default class FormManager {
             .then(() => {
                 // Setup drop down values and build form
                 this.initializeTemplatesDropDown();
-                // Listener for messages from content scripts
+                // Listener for storage from content scripts
                 this.setupResultDOMListener();
                 // Setup .click() and .change()
                 this.setupScanButtonClickEvent();

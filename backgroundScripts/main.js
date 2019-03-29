@@ -16,7 +16,7 @@ let setup = () => {
     //  Initialize onClicked event handler for all context menus
     ContextMenusEvents.multipleOnClickedSetup();
 
-    // Update QAA context menu with active environment
+    // Update QAA context menu with active projectProperties
     contextMenus.updateCurrentEnvironment();
 
 };

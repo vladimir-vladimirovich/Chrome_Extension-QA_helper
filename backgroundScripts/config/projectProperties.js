@@ -1,4 +1,8 @@
-export let environment = {
+export let projectProperties = {
     defaultEnvironmentURL: "",
-    defaultFEJSONPass: ""
+    defaultFEJSONPass: "",
+    storage: {
+        urlChange: "URLChange",
+        versionPathChange: "versionPathChange"
+    }
 };

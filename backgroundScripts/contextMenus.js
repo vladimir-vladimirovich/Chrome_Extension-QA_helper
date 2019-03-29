@@ -22,7 +22,7 @@ contextMenus.addMultipleItems = function () {
 };
 
 /**
- * Call this function to trigger current environment link update in context menu
+ * Call this function to trigger current projectProperties link update in context menu
  */
 contextMenus.updateCurrentEnvironment = function () {
     chrome.storage.local.get(["defaultURL"], function (result) {

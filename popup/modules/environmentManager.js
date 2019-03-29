@@ -188,11 +188,12 @@ export default class EnvironmentManager {
     };
 
     /**
-     * Change event for environment selector
+     * Change event for projectProperties selector
      */
     setupEnvSelectorChangeEvent() {
         $(this.environmentSelector).change(async (event) => {
             await this.saveDataToStorage(environmentManagerData.storage.activeEnvironment, event.target.value);
+            chrome.runtime.sendMessage({[environmentManagerData.messages.urlChange]: event.target.value});
             this.initializeEnvironmentsSelector();
         })
     };
@@ -203,6 +204,7 @@ export default class EnvironmentManager {
     setupVersionSelectorChangeEvent() {
         $(this.versionSelector).change(async event => {
             await this.saveDataToStorage(environmentManagerData.storage.activeVersion, event.target.value);
+            chrome.runtime.sendMessage({[environmentManagerData.messages.versionPathChange]: event.target.value});
             this.initializeVersionsSelector();
         })
     };
@@ -241,7 +243,7 @@ export default class EnvironmentManager {
     };
 
     /**
-     * Returns currently active environment group
+     * Returns currently active projectProperties group
      */
     getActiveGroup() {
         return new Promise(resolve => {
@@ -280,7 +282,7 @@ export default class EnvironmentManager {
     };
 
     /**
-     * Returns active environment
+     * Returns active projectProperties
      */
     getActive(storage) {
         return new Promise(resolve => {
@@ -381,7 +383,7 @@ export default class EnvironmentManager {
     };
 
     /**
-     * Complete environment manager module setup
+     * Complete projectProperties manager module setup
      */
     setup() {
         this.initializeEnvironmentsStorage()

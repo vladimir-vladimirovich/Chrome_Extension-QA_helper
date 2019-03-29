@@ -1,4 +1,4 @@
-import {environment} from "../config/projectProperties.js";
+import {projectProperties} from "../config/projectProperties.js";
 
 /**
  * 1. Sends AJAX request
@@ -9,15 +9,15 @@ export default {
     getVersionJSON(callback) {
         let xhr = new XMLHttpRequest();
 
-        console.log('888 environment.defaultEnvironmentURL + environment.defaultFEJSONPass');
-        console.log(environment.defaultEnvironmentURL + environment.defaultFEJSONPass + " ololo");
+        console.log('888 projectProperties.defaultEnvironmentURL + projectProperties.defaultFEJSONPass');
+        console.log(projectProperties.defaultEnvironmentURL + projectProperties.defaultFEJSONPass);
 
         // Set connection options
-        xhr.open('GET', environment.defaultEnvironmentURL + environment.defaultFEJSONPass, true);
+        xhr.open('GET', projectProperties.defaultEnvironmentURL + projectProperties.defaultFEJSONPass, true);
 
         // Actions to be performed on load
         xhr.onload = () => {
-            if (environment.defaultEnvironmentURL === "" && environment.defaultFEJSONPass === "") {
+            if (projectProperties.defaultEnvironmentURL === "" && projectProperties.defaultFEJSONPass === "") {
                 callback("Bad XMLHttpResponse... :(");
             } else {
                 let versionJSON = JSON.parse(xhr.responseText);
