@@ -15,3 +15,4 @@ let environmentManager = new EnvironmentManager();
 environmentManager.initializeStorage();
 environmentManager.initializeSetDefaultActiveGroup();
 environmentManager.setupChangeActiveGroupEvent();
+environmentManager.setup();

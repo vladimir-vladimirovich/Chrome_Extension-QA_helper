@@ -56,9 +56,11 @@
                     </select>
                     <div class="input-group-append">
                         <button class="btn btn-outline-danger" type="button" id="deleteSelectedEnvButton">-</button>
-                        <button class="btn btn-outline-secondary mdi mdi-arrow-down-drop-circle mdi-12px" type="button"
+                        <button class="btn btn-outline-secondary mdi mdi-arrow-down-drop-circle mdi-12px"
+                                type="button"
                                 data-toggle="collapse"
-                                data-target="#addEnvironmentCollapse">
+                                data-target="#addEnvironmentCollapse"
+                                id="expandEnvironmentLinkButton">
                         </button>
                     </div>
                 </div>
@@ -66,7 +68,8 @@
                 <div class="input-group mt-2 collapse" id="addEnvironmentCollapse">
                     <input type="text" class="form-control" placeholder="https://..."
                            aria-label="Recipient's username"
-                           aria-describedby="basic-addon2">
+                           aria-describedby="basic-addon2"
+                           id="addEnvironmentLinkInput">
                     <div class="input-group-append">
                         <button class="btn btn-outline-success" type="button" id="addEnvironment">+</button>
                     </div>
@@ -78,20 +81,19 @@
             <div class="container">
                 <label for="versionPathSelector" class="mt-2">Version</label>
                 <div class="input-group">
-                    <select class="custom-select" id="versionPathSelector">
-                        <option selected>Choose version</option>
-                    </select>
+                    <select class="custom-select" id="versionPathSelector"></select>
                     <div class="input-group-append">
                         <button class="btn btn-outline-danger" type="button" id="deleteSelectedVersionButton">-</button>
                         <button class="btn btn-outline-secondary mdi mdi-arrow-down-drop-circle mdi-12px" type="button"
                                 data-toggle="collapse"
-                                data-target="#addVersionCollapse">
+                                data-target="#addVersionCollapse"
+                                id="expandVersionLinkButton">
                         </button>
                     </div>
                 </div>
 
                 <div class="input-group mt-2 collapse" id="addVersionCollapse">
-                    <input type="text" class="form-control" placeholder="/html/...">
+                    <input type="text" class="form-control" placeholder="/html/..." id="addVersionLinkInput">
                     <div class="input-group-append">
                         <button class="btn btn-outline-success" type="button" id="addVersion">+</button>
                     </div>
