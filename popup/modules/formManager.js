@@ -355,7 +355,9 @@ export default class FormManager {
      */
     setupTemplateSelectorsValues(templateName, form) {
         for (let i = 0; i < this.currentFormDOM.length; i++) {
-            $(this.currentFormDOM[i]).find("select")[0].value = form[i].state;
+            if ($(this.currentFormDOM[i]).find("select")[0]) {
+                $(this.currentFormDOM[i]).find("select")[0].value = form[i].state;
+            }
         }
     };
 
