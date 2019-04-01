@@ -1,19 +1,19 @@
-import environmentManagerData from "../data/environmentManagerData.js";
+import envManagerData from "../data/envManagerData.js";
 import formManagerData from "../data/formManagerData.js";
 
 export default class EnvironmentManager {
     constructor() {
-        this.environmentRadioGroup = document.getElementsByName(environmentManagerData.selectors.environmentRadioGroup);
-        this.environmentSelector = document.querySelector(environmentManagerData.selectors.environmentSelector);
-        this.environmentInput = document.querySelector(environmentManagerData.selectors.environmentInput);
-        this.environmentAddButton = document.querySelector(environmentManagerData.selectors.environmentAddButton);
-        this.environmentExpandButton = document.querySelector(environmentManagerData.selectors.environmentExpandButton);
-        this.environmentRemoveButton = document.querySelector(environmentManagerData.selectors.environmentRemoveButton);
-        this.versionSelector = document.querySelector(environmentManagerData.selectors.versionSelector);
-        this.versionInput = document.querySelector(environmentManagerData.selectors.versionInput);
-        this.versionAddButton = document.querySelector(environmentManagerData.selectors.versionAddButton);
-        this.versionExpandButton = document.querySelector(environmentManagerData.selectors.versionExpandButton);
-        this.versionRemoveButton = document.querySelector(environmentManagerData.selectors.versionRemoveButton);
+        this.environmentRadioGroup = document.getElementsByName(envManagerData.selectors.environmentRadioGroup);
+        this.environmentSelector = document.querySelector(envManagerData.selectors.environmentSelector);
+        this.environmentInput = document.querySelector(envManagerData.selectors.environmentInput);
+        this.environmentAddButton = document.querySelector(envManagerData.selectors.environmentAddButton);
+        this.environmentExpandButton = document.querySelector(envManagerData.selectors.environmentExpandButton);
+        this.environmentRemoveButton = document.querySelector(envManagerData.selectors.environmentRemoveButton);
+        this.versionSelector = document.querySelector(envManagerData.selectors.versionSelector);
+        this.versionInput = document.querySelector(envManagerData.selectors.versionInput);
+        this.versionAddButton = document.querySelector(envManagerData.selectors.versionAddButton);
+        this.versionExpandButton = document.querySelector(envManagerData.selectors.versionExpandButton);
+        this.versionRemoveButton = document.querySelector(envManagerData.selectors.versionRemoveButton);
     };
 
     /**
@@ -21,14 +21,14 @@ export default class EnvironmentManager {
      */
     initializeEnvironmentsStorage() {
         return new Promise(resolve => {
-            chrome.storage.local.get(environmentManagerData.storage.environments, result => {
-                if (!result[environmentManagerData.storage.environments]) {
-                    result[environmentManagerData.storage.environments] = {};
-                    result[environmentManagerData.storage.environments][environmentManagerData.storage.test] = [];
-                    result[environmentManagerData.storage.environments][environmentManagerData.storage.stg] = [];
-                    result[environmentManagerData.storage.environments][environmentManagerData.storage.prod] = [];
+            chrome.storage.local.get(envManagerData.storage.environments, result => {
+                if (!result[envManagerData.storage.environments]) {
+                    result[envManagerData.storage.environments] = {};
+                    result[envManagerData.storage.environments][envManagerData.storage.test] = [];
+                    result[envManagerData.storage.environments][envManagerData.storage.stg] = [];
+                    result[envManagerData.storage.environments][envManagerData.storage.prod] = [];
                     chrome.storage.local.set(
-                        {[environmentManagerData.storage.environments]: result[environmentManagerData.storage.environments]},
+                        {[envManagerData.storage.environments]: result[envManagerData.storage.environments]},
                         () => {
                             resolve();
                         })
@@ -42,10 +42,11 @@ export default class EnvironmentManager {
      */
     initializeVersionsStorage() {
         return new Promise(resolve => {
-            chrome.storage.local.get(environmentManagerData.storage.versions, result => {
-                if (!result[environmentManagerData.storage.versions]) {
-                    chrome.storage.local.set({[environmentManagerData.storage.versions]: []});
-                    resolve();
+            chrome.storage.local.get(envManagerData.storage.versions, result => {
+                if (!result[envManagerData.storage.versions]) {
+                    chrome.storage.local.set({[envManagerData.storage.versions]: []}, () => {
+                        resolve();
+                    });
                 } else resolve();
             })
         })
@@ -77,7 +78,7 @@ export default class EnvironmentManager {
             .then(environmentsArray => {
                 this.fillSelectorWithOptions(this.environmentSelector, environmentsArray);
                 this.addNotChosenPlaceholder(this.environmentSelector);
-                return this.getActive(environmentManagerData.storage.activeEnvironment);
+                return this.getActive(envManagerData.storage.activeEnvironment);
             })
             .then(activeEnv => {
                 this.chooseActiveOption(this.environmentSelector, activeEnv);
@@ -92,7 +93,7 @@ export default class EnvironmentManager {
             .then(versions => {
                 this.fillSelectorWithOptions(this.versionSelector, versions);
                 this.addNotChosenPlaceholder(this.versionSelector);
-                return this.getActive(environmentManagerData.storage.activeVersion)
+                return this.getActive(envManagerData.storage.activeVersion)
             })
             .then(activeVersion => {
                 this.chooseActiveOption(this.versionSelector, activeVersion)
@@ -192,8 +193,8 @@ export default class EnvironmentManager {
      */
     setupEnvSelectorChangeEvent() {
         $(this.environmentSelector).change(async (event) => {
-            await this.saveDataToStorage(environmentManagerData.storage.activeEnvironment, event.target.value);
-            chrome.runtime.sendMessage({[environmentManagerData.messages.urlChange]: event.target.value});
+            await this.saveDataToStorage(envManagerData.storage.activeEnvironment, event.target.value);
+            chrome.runtime.sendMessage({[envManagerData.messages.urlChange]: event.target.value});
             this.initializeEnvironmentsSelector();
         })
     };
@@ -203,8 +204,8 @@ export default class EnvironmentManager {
      */
     setupVersionSelectorChangeEvent() {
         $(this.versionSelector).change(async event => {
-            await this.saveDataToStorage(environmentManagerData.storage.activeVersion, event.target.value);
-            chrome.runtime.sendMessage({[environmentManagerData.messages.versionPathChange]: event.target.value});
+            await this.saveDataToStorage(envManagerData.storage.activeVersion, event.target.value);
+            chrome.runtime.sendMessage({[envManagerData.messages.versionPathChange]: event.target.value});
             this.initializeVersionsSelector();
         })
     };
@@ -236,7 +237,7 @@ export default class EnvironmentManager {
             if (selectorValue !== formManagerData.option.notChosen) {
                 let versions = await this.getVersions();
                 versions.splice(versions.indexOf(selectorValue), 1);
-                await this.saveDataToStorage(environmentManagerData.storage.versions, versions);
+                await this.saveDataToStorage(envManagerData.storage.versions, versions);
                 this.initializeVersionsSelector();
             }
         })
@@ -247,9 +248,9 @@ export default class EnvironmentManager {
      */
     getActiveGroup() {
         return new Promise(resolve => {
-            chrome.storage.local.get(environmentManagerData.storage.activeGroup, result => {
-                if (result[environmentManagerData.storage.activeGroup]) {
-                    resolve(result[environmentManagerData.storage.activeGroup])
+            chrome.storage.local.get(envManagerData.storage.activeGroup, result => {
+                if (result[envManagerData.storage.activeGroup]) {
+                    resolve(result[envManagerData.storage.activeGroup])
                 } else resolve(null);
             })
         })
@@ -260,9 +261,9 @@ export default class EnvironmentManager {
      */
     getEnvironments(group) {
         return new Promise(resolve => {
-            chrome.storage.local.get(environmentManagerData.storage.environments, result => {
-                if (result[environmentManagerData.storage.environments] && result[environmentManagerData.storage.environments][group]) {
-                    resolve(result[environmentManagerData.storage.environments][group]);
+            chrome.storage.local.get(envManagerData.storage.environments, result => {
+                if (result[envManagerData.storage.environments] && result[envManagerData.storage.environments][group]) {
+                    resolve(result[envManagerData.storage.environments][group]);
                 } else {
                     resolve(null);
                 }
@@ -275,8 +276,8 @@ export default class EnvironmentManager {
      */
     getVersions() {
         return new Promise(resolve => {
-            chrome.storage.local.get(environmentManagerData.storage.versions, result => {
-                resolve(result[environmentManagerData.storage.versions]);
+            chrome.storage.local.get(envManagerData.storage.versions, result => {
+                resolve(result[envManagerData.storage.versions]);
             })
         })
     };
@@ -299,7 +300,7 @@ export default class EnvironmentManager {
      * @param newActiveGroup
      */
     updateActiveGroup(newActiveGroup) {
-        chrome.storage.local.set({[environmentManagerData.storage.activeGroup]: newActiveGroup})
+        chrome.storage.local.set({[envManagerData.storage.activeGroup]: newActiveGroup})
     };
 
     /**
@@ -309,10 +310,10 @@ export default class EnvironmentManager {
      */
     addEnvironmentToStorage(storage, data) {
         return new Promise(resolve => {
-            chrome.storage.local.get(environmentManagerData.storage.environments, async (result) => {
-                if (result[environmentManagerData.storage.environments]) {
-                    result[environmentManagerData.storage.environments][storage].push(data);
-                    await this.saveDataToStorage(environmentManagerData.storage.environments, result[environmentManagerData.storage.environments]);
+            chrome.storage.local.get(envManagerData.storage.environments, async (result) => {
+                if (result[envManagerData.storage.environments]) {
+                    result[envManagerData.storage.environments][storage].push(data);
+                    await this.saveDataToStorage(envManagerData.storage.environments, result[envManagerData.storage.environments]);
                     resolve();
                 }
             })
@@ -326,14 +327,14 @@ export default class EnvironmentManager {
      */
     removeEnvFromStorage(storage, data) {
         return new Promise(resolve => {
-            chrome.storage.local.get(environmentManagerData.storage.environments, async result => {
-                if (result[environmentManagerData.storage.environments] && result[environmentManagerData.storage.environments][storage]) {
-                    result[environmentManagerData.storage.environments][storage].splice(
-                        result[environmentManagerData.storage.environments][storage].indexOf(data), 1
+            chrome.storage.local.get(envManagerData.storage.environments, async result => {
+                if (result[envManagerData.storage.environments] && result[envManagerData.storage.environments][storage]) {
+                    result[envManagerData.storage.environments][storage].splice(
+                        result[envManagerData.storage.environments][storage].indexOf(data), 1
                     );
                     await this.saveDataToStorage(
-                        environmentManagerData.storage.environments,
-                        result[environmentManagerData.storage.environments]
+                        envManagerData.storage.environments,
+                        result[envManagerData.storage.environments]
                     );
                     resolve();
                 }
@@ -347,10 +348,10 @@ export default class EnvironmentManager {
      */
     addVersionToStorage(version) {
         return new Promise(resolve => {
-            chrome.storage.local.get(environmentManagerData.storage.versions, async result => {
-                if (result[environmentManagerData.storage.versions]) {
-                    result[environmentManagerData.storage.versions].push(version);
-                    await this.saveDataToStorage(environmentManagerData.storage.versions, result[environmentManagerData.storage.versions]);
+            chrome.storage.local.get(envManagerData.storage.versions, async result => {
+                if (result[envManagerData.storage.versions]) {
+                    result[envManagerData.storage.versions].push(version);
+                    await this.saveDataToStorage(envManagerData.storage.versions, result[envManagerData.storage.versions]);
                     resolve();
                 }
             })

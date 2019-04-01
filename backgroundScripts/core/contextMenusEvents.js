@@ -1,7 +1,7 @@
-import {projectProperties} from "../config/projectProperties.js";
 import {commentsCollection} from "../templates/commentsCollection.js";
 import {customComments} from "../templates/cutomsComments.js";
 import RequestHandler from "./requestHandler.js";
+import EnvManagerHandler from "../popupHandlers/envManagerHandler.js";
 
 /**
  * Comment constructor
@@ -12,20 +12,23 @@ import RequestHandler from "./requestHandler.js";
  */
 // To be moved outside this file
 let combineStrings = (id, text, version) => {
-    if (id.includes('comment')) {
-        return `${text}` +
-            `${customComments.comments.devicesStart}${customComments.devices}${customComments.comments.endLine}` +
-            `${customComments.comments.environmentURLStart}${projectProperties.defaultEnvironmentURL} | \n` +
-            `${customComments.comments.versionStart}${version}${customComments.comments.endLine}`+
-            `{panel}`;
-    } else {
-        return `*STR:*\n# Open ${projectProperties.defaultEnvironmentURL}\n` +
-            `${text}` +
-            `${customComments.devices}\n` +
-            `\n${customComments.description.environmentUrlStart}` +
-            `${projectProperties.defaultEnvironmentURL}\n` +
-            `${version}`;
-    }
+    return EnvManagerHandler.getActiveURL()
+        .then(activeURL => {
+            if (id.includes('comment')) {
+                return `${text}` +
+                    `${customComments.comments.devicesStart}${customComments.devices}${customComments.comments.endLine}` +
+                    `${customComments.comments.environmentURLStart}${activeURL} | \n` +
+                    `${customComments.comments.versionStart}${version}${customComments.comments.endLine}` +
+                    `{panel}`;
+            } else {
+                return `*STR:*\n# Open ${activeURL}\n` +
+                    `${text}` +
+                    `${customComments.devices}\n` +
+                    `\n${customComments.description.environmentUrlStart}` +
+                    `${activeURL}\n` +
+                    `${version}`;
+            }
+        });
 };
 
 /**
@@ -43,8 +46,10 @@ let addOnClickHandler = ({id, text}) => {
 
         chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
             RequestHandler.getVersionJSON((parsedVersion) => {
-                let result = combineStrings(id, text, parsedVersion);
-                chrome.tabs.sendMessage(tabs[0].id, {onClick: result})
+                combineStrings(id, text, parsedVersion)
+                    .then(result => {
+                        chrome.tabs.sendMessage(tabs[0].id, {onClick: result})
+                    });
             });
         });
     });

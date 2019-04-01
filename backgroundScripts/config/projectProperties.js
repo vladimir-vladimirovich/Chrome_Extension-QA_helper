@@ -2,7 +2,7 @@ export let projectProperties = {
     defaultEnvironmentURL: "",
     defaultFEJSONPass: "",
     storage: {
-        urlChange: "URLChange",
-        versionPathChange: "versionPathChange"
+        urlChange: "defaultUrl",
+        versionPathChange: "defaultVersion"
     }
 };

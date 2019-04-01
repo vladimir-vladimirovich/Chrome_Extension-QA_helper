@@ -1,4 +1,4 @@
-let environmentManagerData = {
+let envManagerData = {
     selectors: {
         environmentRadioGroup: "environmentRadioGroup",
         environmentSelector: "[id='environmentSelector']",
@@ -28,4 +28,4 @@ let environmentManagerData = {
     }
 };
 
-export default environmentManagerData;
+export default envManagerData;

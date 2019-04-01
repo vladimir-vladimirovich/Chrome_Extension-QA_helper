@@ -65,22 +65,22 @@ export default {
             }
             contextMenus.updateCurrentEnvironment();
         });
-        // Listen to hot keys pressed in content scripts
-        // Send active template details to content scripts in response
-        chrome.runtime.onMessage.addListener(function (message) {
-            if (message.getActiveTemplate) {
-                chrome.storage.local.get(activeTemplateStorage, function (resultActive) {
-                    chrome.storage.local.get(templatesStorage, function (resultTemplates) {
-                        // Send response with data from active template
-                        // Send message to currently active tab
-                        chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
-                            chrome.tabs.sendMessage(tabs[0].id,
-                                {setActiveTemplate: resultTemplates.templatesStorage[resultActive.activeTemplateStorage]});
-                        });
-                    })
-                })
-            }
-        });
+        // // Listen to hot keys pressed in content scripts
+        // // Send active template details to content scripts in response
+        // chrome.runtime.onMessage.addListener(function (message) {
+        //     if (message.getActiveTemplate) {
+        //         chrome.storage.local.get(activeTemplateStorage, function (resultActive) {
+        //             chrome.storage.local.get(templatesStorage, function (resultTemplates) {
+        //                 // Send response with data from active template
+        //                 // Send message to currently active tab
+        //                 chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
+        //                     chrome.tabs.sendMessage(tabs[0].id,
+        //                         {setActiveTemplate: resultTemplates.templatesStorage[resultActive.activeTemplateStorage]});
+        //                 });
+        //             })
+        //         })
+        //     }
+        // });
         checkDefaultURL();
         checkDefaultDevicesList();
     }
