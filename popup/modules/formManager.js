@@ -1,4 +1,6 @@
 import formManagerData from "../data/formManagerData.js";
+import RandomizerUtils from "../utils/randomizerUtils.js";
+import randomizerData from "../data/randomizerData.js";
 
 export default class FormManager {
     constructor() {
@@ -48,7 +50,7 @@ export default class FormManager {
                 let formName = await this.getActiveForm();
                 let formData = await this.getForm(formName);
                 this.initializeForm(formName, formData);
-            } else console.error("#ERROR IN initializeTemplatesDropDown");
+            } else console.log("#ERROR IN initializeTemplatesDropDown");
         });
     };
 
@@ -80,7 +82,7 @@ export default class FormManager {
         if (result[0] && result[0].value) {
             return result[0].value
         } else return null
-    }
+    };
 
     /**
      * Get form array
@@ -108,7 +110,7 @@ export default class FormManager {
                 if (result[formManagerData.storage.activeFormTemplate]) {
                     resolve(result[formManagerData.storage.activeFormTemplate]);
                 } else {
-                    console.error("#ERROR IN getActiveForm");
+                    console.log("#ERROR IN getActiveForm");
                     reject(null);
                 }
             })
@@ -321,6 +323,71 @@ export default class FormManager {
     };
 
     /**
+     * Setup 'change' event for selectors in form in scanResultsArea
+     * @param templateName
+     */
+    setupTemplateSelectorChangeEvent(templateName) {
+        for (let i = 0; i < this.currentFormDOM.length; i++) {
+            $(this.currentFormDOM[i]).find("select").on("change", async (event) => {
+                let form = await this.getForm(templateName);
+                form[i].state = event.target.value;
+                switch (form[i].state) {
+                    case formManagerData.option.internalEmail:
+                        form[i].value = RandomizerUtils.getRandomInternalEmail();
+                        break;
+                    case formManagerData.option.realEmail:
+                        form[i].value = RandomizerUtils.getRandomRealEmail();
+                        break;
+                    case formManagerData.option.username:
+                        form[i].value = RandomizerUtils.getRandomString(randomizerData.alphabet, 10);
+                        break;
+                }
+                await this.updateStorageTemplate(templateName, form);
+                this.initializeForm(templateName, form);
+            })
+        }
+    };
+
+    /**
+     * Setup values for selectors in scanResultsArea
+     * @param templateName
+     * @param form
+     */
+    setupTemplateSelectorsValues(templateName, form) {
+        for (let i = 0; i < this.currentFormDOM.length; i++) {
+            $(this.currentFormDOM[i]).find("select")[0].value = form[i].state;
+        }
+    };
+
+    /**
+     * Save active storage template with new random values before page unload
+     */
+    saveNewRandomValuesBeforeUnload() {
+        window.addEventListener("beforeunload", async (event) => {
+            event.preventDefault();
+            let activeTemplate = await this.getActiveForm();
+            let form = await this.getForm(activeTemplate);
+
+            if (form) {
+                form.forEach((item) => {
+                    switch (item.state) {
+                        case formManagerData.option.internalEmail:
+                            item.value = RandomizerUtils.getRandomInternalEmail();
+                            break;
+                        case formManagerData.option.realEmail:
+                            item.value = RandomizerUtils.getRandomRealEmail();
+                            break;
+                        case formManagerData.option.username:
+                            item.value = RandomizerUtils.getRandomString(randomizerData.alphabet, 10);
+                            break;
+                    }
+                });
+            }
+            this.updateStorageTemplate(activeTemplate, form);
+        })
+    };
+
+    /**
      * Add input field to page
      * @param name
      * @param value
@@ -331,9 +398,10 @@ export default class FormManager {
             '                <div class="btn-group">' +
             `                    <input type="text" class="form-control col-7" value='${value}'>` +
             '                    <select class="custom-select col-3">' +
-            '                        <option value="Only empty">None</option>' +
-            '                        <option value="Only filled">Username randomized</option>' +
-            '                        <option value="Only input">Email randomized</option>' +
+            '                        <option value="None">None</option>' +
+            '                        <option value="Username">Username(random)</option>' +
+            '                        <option value="Real email">Real email(random)</option>' +
+            '                        <option value="Internal email">Internal email(random)</option>' +
             '                    </select>' +
             '                    <button class="btn btn-outline-danger col-2">-</button>' +
             '                </div>' +
@@ -369,6 +437,8 @@ export default class FormManager {
             this.rebuildDOM();
             this.changeDisableStatus(this.scanResultsArea, false);
             this.setupFocusoutEvent(templateName);
+            this.setupTemplateSelectorChangeEvent(templateName);
+            this.setupTemplateSelectorsValues(templateName, form);
         }
     };
 
@@ -408,15 +478,18 @@ export default class FormManager {
     setupFormManagerModule() {
         // Create main storage variable
         this.initializeStorage()
-        // Setup drop down values and build form
-            .then(() => this.initializeTemplatesDropDown())
-            // Listener for messages from content scripts
-            .then(() => this.setupResultDOMListener())
-            // Setup .click() and .change()
-            .then(() => this.setupScanButtonClickEvent())
-            .then(() => this.setupAddFormButtonClickEvent())
-            .then(() => this.setupFormChangeEvent())
-            .then(() => this.setupRemoveTemplateEvent())
-            .then(() => this.setupPasteFormClickEvent());
+            .then(() => {
+                // Setup drop down values and build form
+                this.initializeTemplatesDropDown();
+                // Listener for storage from content scripts
+                this.setupResultDOMListener();
+                // Setup .click() and .change()
+                this.setupScanButtonClickEvent();
+                this.setupAddFormButtonClickEvent();
+                this.setupFormChangeEvent();
+                this.setupRemoveTemplateEvent();
+                this.setupPasteFormClickEvent();
+                this.saveNewRandomValuesBeforeUnload();
+            })
     }
 }

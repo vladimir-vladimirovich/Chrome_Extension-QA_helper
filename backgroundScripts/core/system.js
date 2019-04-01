@@ -1,4 +1,4 @@
-import {environment} from "../config/projectProperties.js";
+import {projectProperties} from "../config/projectProperties.js";
 import {contextMenus} from "../contextMenus.js"
 import {customComments} from "../templates/cutomsComments.js";
 
@@ -10,16 +10,16 @@ let checkDefaultURL = () => {
         console.log("checking storage...");
         if (result.defaultURL) {
             console.log("result.defaultURL: " + result.defaultURL);
-            environment.defaultEnvironmentURL = result.defaultURL;
+            projectProperties.defaultEnvironmentURL = result.defaultURL;
         }
     });
     chrome.storage.local.get(['defaultVersionPath'], function (result) {
         console.log("checking storage...");
         if (result.defaultVersionPath) {
             console.log("result.defaultVersionPath: " + result.defaultVersionPath);
-            environment.defaultFEJSONPass = result.defaultVersionPath;
+            projectProperties.defaultFEJSONPass = result.defaultVersionPath;
         }
-    })
+    });
 };
 
 let formatDevicesArrayToString = function(devicesArray) {
@@ -51,13 +51,13 @@ let checkDefaultDevicesList = () => {
  */
 export default {
     init() {
-        //Listener for environment URL update
+        //Listener for projectProperties URL update
         chrome.runtime.onMessage.addListener((request) => {
             if (request.URLChange) {
-                environment.defaultEnvironmentURL = request.URLChange;
+                projectProperties.defaultEnvironmentURL = request.URLChange;
             }
             if (request.versionPathChange) {
-                environment.defaultFEJSONPass = request.versionPathChange;
+                projectProperties.defaultFEJSONPass = request.versionPathChange;
             }
             if (request.deviceListChange) {
                 // Update template
@@ -65,22 +65,22 @@ export default {
             }
             contextMenus.updateCurrentEnvironment();
         });
-        // Listen to hot keys pressed in content scripts
-        // Send active template details to content scripts in response
-        chrome.runtime.onMessage.addListener(function (message) {
-            if (message.getActiveTemplate) {
-                chrome.storage.local.get(activeTemplateStorage, function (resultActive) {
-                    chrome.storage.local.get(templatesStorage, function (resultTemplates) {
-                        // Send response with data from active template
-                        // Send message to currently active tab
-                        chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
-                            chrome.tabs.sendMessage(tabs[0].id,
-                                {setActiveTemplate: resultTemplates.templatesStorage[resultActive.activeTemplateStorage]});
-                        });
-                    })
-                })
-            }
-        });
+        // // Listen to hot keys pressed in content scripts
+        // // Send active template details to content scripts in response
+        // chrome.runtime.onMessage.addListener(function (message) {
+        //     if (message.getActiveTemplate) {
+        //         chrome.storage.local.get(activeTemplateStorage, function (resultActive) {
+        //             chrome.storage.local.get(templatesStorage, function (resultTemplates) {
+        //                 // Send response with data from active template
+        //                 // Send message to currently active tab
+        //                 chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
+        //                     chrome.tabs.sendMessage(tabs[0].id,
+        //                         {setActiveTemplate: resultTemplates.templatesStorage[resultActive.activeTemplateStorage]});
+        //                 });
+        //             })
+        //         })
+        //     }
+        // });
         checkDefaultURL();
         checkDefaultDevicesList();
     }

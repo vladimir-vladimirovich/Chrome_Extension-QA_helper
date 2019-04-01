@@ -1,6 +1,6 @@
 import {contextMenus} from "./contextMenus.js";
-import System from "./core/system.js";
 import ContextMenusEvents from "./core/contextMenusEvents.js";
+import EnvManagerHandler from "./popupHandlers/envManagerHandler.js";
 
 /**
  * Call all required method to:
@@ -8,7 +8,7 @@ import ContextMenusEvents from "./core/contextMenusEvents.js";
  * - add onClicked event listeners to created context menus
  */
 let setup = () => {
-    System.init();
+    // System.init();
 
     // Add all menu items to context menu
     contextMenus.addMultipleItems();
@@ -16,9 +16,17 @@ let setup = () => {
     //  Initialize onClicked event handler for all context menus
     ContextMenusEvents.multipleOnClickedSetup();
 
-    // Update QAA context menu with active environment
+    // Update QAA context menu with active projectProperties
     contextMenus.updateCurrentEnvironment();
 
+    EnvManagerHandler.initializeActiveEnvStorage()
+        .then(() => {
+            return EnvManagerHandler.initializeActiveVersionStorage();
+        })
+        .then(() => {
+            EnvManagerHandler.getActiveVersion();
+            EnvManagerHandler.changeEnvListener();
+        })
 };
 
 setup();

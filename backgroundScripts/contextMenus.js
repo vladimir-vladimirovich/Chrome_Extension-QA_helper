@@ -1,4 +1,5 @@
 import {menuCollection} from "./templates/menuCollection.js";
+import envManagerData from "./data/envManagerData.js";
 
 let contextMenus = {};
 
@@ -22,16 +23,19 @@ contextMenus.addMultipleItems = function () {
 };
 
 /**
- * Call this function to trigger current environment link update in context menu
+ * Call this function to trigger current projectProperties link update in context menu
  */
 contextMenus.updateCurrentEnvironment = function () {
-    chrome.storage.local.get(["defaultURL"], function (result) {
-        if (result.defaultURL === null || result.defaultURL === undefined) {
-            result.defaultURL = "";
+    chrome.storage.local.get(envManagerData.storage.activeEnvironment, function (result) {
+        if (
+            result[envManagerData.storage.activeEnvironment] === null
+            || result[envManagerData.storage.activeEnvironment] === undefined
+        ) {
+            result[envManagerData.storage.activeEnvironment] = "";
         }
 
         chrome.contextMenus.update("QAA", {
-            "title": `QAA [${result.defaultURL}]`
+            "title": `QAA [${result[envManagerData.storage.activeEnvironment]}]`
         });
     });
 };
