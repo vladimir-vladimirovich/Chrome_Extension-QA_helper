@@ -1,6 +1,7 @@
 import {contextMenus} from "./contextMenus.js";
 import ContextMenusEvents from "./core/contextMenusEvents.js";
 import EnvManagerHandler from "./popupHandlers/envManagerHandler.js";
+import DeviceManagerHandler from "./popupHandlers/deviceManagerHandler.js";
 
 /**
  * Call all required method to:
@@ -26,7 +27,10 @@ let setup = () => {
         .then(() => {
             EnvManagerHandler.getActiveVersion();
             EnvManagerHandler.changeEnvListener();
-        })
+        });
+
+    DeviceManagerHandler.checkDefaultDevicesList();
+    DeviceManagerHandler.deviceListChangedListener();
 };
 
 setup();
