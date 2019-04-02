@@ -47,9 +47,9 @@ export default class FormManager {
                 });
                 this.addNotChosenPlaceholder();
                 this.chooseActiveFrom();
-                let formName = await this.getActiveForm();
-                let formData = await this.getForm(formName);
-                this.initializeForm(formName, formData);
+                let activeForm = await this.getActiveForm();
+                let form = await this.getForm(activeForm);
+                this.initializeForm(activeForm, form);
             } else console.log("#ERROR IN initializeTemplatesDropDown");
         });
     };
@@ -148,7 +148,10 @@ export default class FormManager {
                     result[formManagerData.storage.formTemplates][templateName] = template;
                     await this.saveDataToChromeStorage(formManagerData.storage.formTemplates, result[formManagerData.storage.formTemplates]);
                     resolve();
-                } else console.error("#ERROR IN updateStorageTemplate")
+                } else {
+                    console.error("#ERROR IN updateStorageTemplate");
+                    resolve();
+                }
             })
         })
     };
@@ -364,12 +367,8 @@ export default class FormManager {
     /**
      * Save active storage template with new random values before page unload
      */
-    saveNewRandomValuesBeforeUnload() {
-        window.addEventListener("beforeunload", async (event) => {
-            event.preventDefault();
-            let activeTemplate = await this.getActiveForm();
-            let form = await this.getForm(activeTemplate);
-
+    updateRandomValues(templateName, form) {
+        return new Promise(async resolve => {
             if (form) {
                 form.forEach((item) => {
                     switch (item.state) {
@@ -384,8 +383,9 @@ export default class FormManager {
                             break;
                     }
                 });
+                await this.updateStorageTemplate(templateName, form);
             }
-            this.updateStorageTemplate(activeTemplate, form);
+            resolve(form);
         })
     };
 
@@ -431,16 +431,19 @@ export default class FormManager {
      */
     initializeForm(templateName, form) {
         if (templateName !== null) {
-            this.changeDisableStatus(this.scanResultsArea, true);
-            this.setFormData(form);
-            this.setFormDOM();
-            this.setupRemoveFromStorageEvents(templateName);
-            this.setupRemoveFromDOMEvents();
-            this.rebuildDOM();
-            this.changeDisableStatus(this.scanResultsArea, false);
-            this.setupFocusoutEvent(templateName);
-            this.setupTemplateSelectorChangeEvent(templateName);
-            this.setupTemplateSelectorsValues(templateName, form);
+            this.disableFormDOM(this.scanResultsArea, true);
+            this.updateRandomValues(templateName, form)
+                .then(resultForm => {
+                    this.setFormData(resultForm);
+                    this.setFormDOM();
+                    this.setupRemoveFromStorageEvents(templateName);
+                    this.setupRemoveFromDOMEvents();
+                    this.rebuildDOM();
+                    this.setupFocusoutEvent(templateName);
+                    this.setupTemplateSelectorChangeEvent(templateName);
+                    this.setupTemplateSelectorsValues(templateName, resultForm);
+                    this.disableFormDOM(this.scanResultsArea, false);
+                });
         }
     };
 
@@ -468,7 +471,7 @@ export default class FormManager {
      * @param element {Element}
      * @param status {Boolean}
      */
-    changeDisableStatus(element, status) {
+    disableFormDOM(element, status) {
         $(element).find('button').prop("disabled", status);
         $(element).find('input').prop("disabled", status);
         $(element).find('select').prop("disabled", status);
@@ -491,7 +494,6 @@ export default class FormManager {
                 this.setupFormChangeEvent();
                 this.setupRemoveTemplateEvent();
                 this.setupPasteFormClickEvent();
-                this.saveNewRandomValuesBeforeUnload();
             })
     }
 }
