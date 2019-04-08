@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "PT QA Assistant",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"description": "PT QA Assistant",
     "icons": {
       "16": "images/skull-2.png"
