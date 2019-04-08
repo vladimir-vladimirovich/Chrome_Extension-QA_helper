@@ -1,6 +1,8 @@
 import formManagerData from "../data/formManagerData.js";
 import RandomizerUtils from "../utils/randomizerUtils.js";
 import randomizerData from "../data/randomizerData.js";
+import ValidationUtils from "../utils/validationUtils.js";
+import validationData from "../data/validationData.js";
 
 export default class FormManager {
     constructor() {
@@ -276,13 +278,24 @@ export default class FormManager {
      */
     setupAddFormButtonClickEvent() {
         $(this.addFormTemplateButton).click(async () => {
-            if ($(this.addFormTemplateInput)[0].value) {
+            if (
+                ValidationUtils.validateInputField(this.addFormTemplateInput, $(this.addFormTemplateInput)[0].value, validationData.regex.formInput)
+            ) {
                 if (this.currentFormData.length > 0 && this.currentFormDOM.length > 0) {
                     await this.updateStorageTemplate($(this.addFormTemplateInput)[0].value, this.currentFormData);
                     this.initializeTemplatesDropDown();
                     this.expandFormTemplateButton.click();
                 } else console.error("#ERROR IN setupAddFormButtonClickEvent: 'current' values aren't empty")
-            } else console.error("#ERROR IN setupAddFormButtonClickEvent: incorrect input")
+            }
+
+
+            // if ($(this.addFormTemplateInput)[0].value) {
+            //     if (this.currentFormData.length > 0 && this.currentFormDOM.length > 0) {
+            //         await this.updateStorageTemplate($(this.addFormTemplateInput)[0].value, this.currentFormData);
+            //         this.initializeTemplatesDropDown();
+            //         this.expandFormTemplateButton.click();
+            //     } else console.error("#ERROR IN setupAddFormButtonClickEvent: 'current' values aren't empty")
+            // } else console.error("#ERROR IN setupAddFormButtonClickEvent: incorrect input")
         })
     };
 
