@@ -1,5 +1,7 @@
 import envManagerData from "../data/envManagerData.js";
 import formManagerData from "../data/formManagerData.js";
+import ValidationUtils from "../utils/validationUtils.js";
+import validationData from "../data/validationData.js";
 
 export default class EnvManager {
     constructor() {
@@ -162,9 +164,11 @@ export default class EnvManager {
         $(this.environmentAddButton).click(async () => {
             let activeGroup = await this.getActiveGroup();
             let inputValue = $(this.environmentInput).val();
-            await this.addEnvironmentToStorage(activeGroup, inputValue);
-            $(this.environmentExpandButton).click();
-            this.initializeEnvironmentsSelector(this.environmentSelector);
+            if (ValidationUtils.validateInputField(this.environmentInput, inputValue, validationData.regex.envURL)) {
+                await this.addEnvironmentToStorage(activeGroup, inputValue);
+                $(this.environmentExpandButton).click();
+                this.initializeEnvironmentsSelector(this.environmentSelector);
+            } else console.log("[INFO][setupAddLinkButtonClickEvent] not valid input");
         })
     };
 
@@ -174,9 +178,11 @@ export default class EnvManager {
     setupAddVersionClickEvent() {
         $(this.versionAddButton).click(async () => {
             let inputValue = $(this.versionInput).val();
-            await this.addVersionToStorage(inputValue);
-            $(this.versionExpandButton).click();
-            this.initializeVersionsSelector();
+            if (ValidationUtils.validateInputField(this.versionInput, inputValue, validationData.regex.versionPath)) {
+                await this.addVersionToStorage(inputValue);
+                $(this.versionExpandButton).click();
+                this.initializeVersionsSelector();
+            } else console.log("[INFO][setupAddVersionClickEvent] not valid input");
         })
     };
 

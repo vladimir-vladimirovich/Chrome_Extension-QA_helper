@@ -1,3 +1,6 @@
+import ValidationUtils from "../utils/validationUtils.js";
+import validationData from "../data/validationData.js";
+
 // --- STORAGE VARIABLES ---
 // Place to keep device list
 let deviceListStorage = 'deviceListStorage';
@@ -155,7 +158,7 @@ let setupDeviceList = function () {
     $(addDeviceButton).click(function () {
         let newDevice = $(addDeviceInput)[0].value;
         console.log(">>> newDevice: " + newDevice);
-        if (newDevice !== undefined && newDevice !== null && newDevice !== "") {
+        if (ValidationUtils.validateInputField(addDeviceInput, newDevice, validationData.regex.deviceInput)) {
             addDeviceToPool(newDevice);
         }
     });
