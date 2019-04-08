@@ -110,7 +110,7 @@ export default class FormManager {
                 if (result[formManagerData.storage.activeFormTemplate]) {
                     resolve(result[formManagerData.storage.activeFormTemplate]);
                 } else {
-                    console.log("#ERROR IN getActiveForm");
+                    console.log("#[INFO][getActiveForm] There is no active form yet");
                     reject(null);
                 }
             })

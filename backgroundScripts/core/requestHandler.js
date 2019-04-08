@@ -21,7 +21,7 @@ export default {
 
                 // Actions to be performed on load
                 xhr.onload = () => {
-                    if (activeURL === "" && activeVersion === "") {
+                    if (activeURL === "" || activeVersion === "") {
                         callback("Bad XMLHttpResponse... :(");
                     } else {
                         let versionJSON = JSON.parse(xhr.responseText);

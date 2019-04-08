@@ -10,7 +10,10 @@ let envManagerData = {
         versionInput: "[id='addVersionLinkInput']",
         versionAddButton: "[id='addVersion']",
         versionExpandButton: "[id='expandVersionLinkButton']",
-        versionRemoveButton: "[id='deleteSelectedVersionButton']"
+        versionRemoveButton: "[id='deleteSelectedVersionButton']",
+        testOption: "[id='testOption']",
+        stgOption: "[id='stgOption']",
+        prodOption: "[id='prodOption']"
     },
     storage: {
         activeGroup: "activeGroup",
