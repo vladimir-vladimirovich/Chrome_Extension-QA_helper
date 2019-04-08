@@ -1,7 +1,7 @@
 import envManagerData from "../data/envManagerData.js";
 import formManagerData from "../data/formManagerData.js";
 
-export default class EnvironmentManager {
+export default class EnvManager {
     constructor() {
         this.environmentRadioGroup = document.getElementsByName(envManagerData.selectors.environmentRadioGroup);
         this.environmentSelector = document.querySelector(envManagerData.selectors.environmentSelector);
@@ -14,6 +14,7 @@ export default class EnvironmentManager {
         this.versionAddButton = document.querySelector(envManagerData.selectors.versionAddButton);
         this.versionExpandButton = document.querySelector(envManagerData.selectors.versionExpandButton);
         this.versionRemoveButton = document.querySelector(envManagerData.selectors.versionRemoveButton);
+        this.testOption = document.querySelector(envManagerData.selectors.testOption);
     };
 
     /**
@@ -55,14 +56,15 @@ export default class EnvironmentManager {
     /**
      * Choose active group
      */
-    initializeSetDefaultActiveGroup() {
-        // let activeGroup = await this.getActiveGroup();
+    initializeDefaultActiveGroup() {
         this.getActiveGroup()
             .then(result => {
                 if (result) {
                     $(this.environmentRadioGroup).filter(function () {
                         return $(this).val() === result;
                     }).parent().addClass("active")
+                } else {
+                    $(this.testOption).parent().addClass("active")
                 }
             })
     };
@@ -392,7 +394,7 @@ export default class EnvironmentManager {
                 return this.initializeVersionsStorage();
             })
             .then(() => {
-                this.initializeSetDefaultActiveGroup();
+                this.initializeDefaultActiveGroup();
                 this.initializeEnvironmentsSelector();
                 this.initializeVersionsSelector();
 
