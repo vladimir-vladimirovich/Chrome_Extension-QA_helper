@@ -8,7 +8,7 @@ Ability to create environment pool and swith between them on demand
 2. add device:
 Ability to create device pool. Active(marked with green) devices will be pasted in comment
 <img src="https://media.giphy.com/media/oNFG3gfqQ87YANSJMp/giphy.gif" width="300" height="300" />
-3. past comment
+3. past comment:
 Comments can be pasted from context menu: right mouse click
 <img src="https://media.giphy.com/media/28cXgAM5zz9zErFu4c/giphy.gif" width="300" height="300" />
 
