@@ -287,15 +287,6 @@ export default class FormManager {
                     this.expandFormTemplateButton.click();
                 } else console.error("#ERROR IN setupAddFormButtonClickEvent: 'current' values aren't empty")
             }
-
-
-            // if ($(this.addFormTemplateInput)[0].value) {
-            //     if (this.currentFormData.length > 0 && this.currentFormDOM.length > 0) {
-            //         await this.updateStorageTemplate($(this.addFormTemplateInput)[0].value, this.currentFormData);
-            //         this.initializeTemplatesDropDown();
-            //         this.expandFormTemplateButton.click();
-            //     } else console.error("#ERROR IN setupAddFormButtonClickEvent: 'current' values aren't empty")
-            // } else console.error("#ERROR IN setupAddFormButtonClickEvent: incorrect input")
         })
     };
 
